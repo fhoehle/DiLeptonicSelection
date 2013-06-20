@@ -6,9 +6,13 @@ cmsswVer=CMSSW_4_2_8_patch7
 echo "Installing My FWK "
 #
 export SCRAM_ARCH=slc5_amd64_gcc434
-cmsrel $cmsswVer
-
-cd $cmsswVer
+if [ -z "$CMSSW_BASE" ]; then
+ echo "creating "$cmsswVer
+ cmsrel $cmsswVer
+ cd $cmsswVer
+elif 
+ cd $CMSSW_BASE
+fi
 cmsenv
 cd src
 addpkg AnalysisDataFormats/TopObjects         V06-07-09
