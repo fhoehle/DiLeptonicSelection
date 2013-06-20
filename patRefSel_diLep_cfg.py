@@ -660,8 +660,8 @@ if runPF2PAT:
   ## pileupWeight
   process.addPileupInfo = cms.EDProducer("AddPileUpWeightsProducer",
                                   vertexSrc = cms.InputTag("offlinePrimaryVertices"),
-  pileupFile1 = cms.string("$CMSSW_BASE/src/MyProducers/AddPileUpWeightsProducer/input/JeremyFWK_PU3DMC.root"),
-  pileupFile2 = cms.string("$CMSSW_BASE/src/MyProducers/AddPileUpWeightsProducer/input/JeremyFWK_dataPUhisto_2011AB_73.5mb_pixelLumi_diffBinning_bin25.root"),
+  pileupFile1 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/input/JeremyFWK_PU3DMC.root"),
+  pileupFile2 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/input/JeremyFWK_dataPUhisto_2011AB_73.5mb_pixelLumi_diffBinning_bin25.root"),
   PUHistname1 = cms.string("histoMCPU"),
   PUHistname2 = cms.string("pileup")
 )
@@ -830,9 +830,10 @@ process.out.outputCommands = cms.untracked.vstring('keep *_*_*_'+process.name_()
 # simple production
 process.simpleProd = cms.Path()
 process.addMyPileupInfo = cms.EDProducer("AddPileUpWeightsProducer", vertexSrc = cms.InputTag("offlinePrimaryVertices"),
-   pileupFile1 = cms.string("$CMSSW_BASE/src/MyProducers/AddPileUpWeightsProducer/input/JeremyFWK_PU3DMC.root"),
-   pileupFile2 = cms.string("$CMSSW_BASE/src/MyProducers/AddPileUpWeightsProducer/input/JeremyFWK_dataPUhisto_2011AB_73.5mb_pixelLumi_diffBinning_bin25.root"),
+   pileupFile1 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/input/JeremyFWK_PU3DMC.root"),
+   pileupFile2 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/input/JeremyFWK_dataPUhisto_2011AB_73.5mb_pixelLumi_diffBinning_bin25.root"),
    PUHistname1 = cms.string("histoMCPU"), PUHistname2 = cms.string("pileup")); process.simpleProd += process.addMyPileupInfo
+process.MessageLogger.debugModules.append('addMyPileupInfo')
 #process.addMyBTagWeights = cms.EDProducer("AddMyBTagWeights"); process.simpleProd += process.addMyBTagWeights
 process.out.SelectEvents.SelectEvents.append( 'simpleProd' )
 # Compute the mean pt per unit area (rho) from the
