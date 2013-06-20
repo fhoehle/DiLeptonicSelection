@@ -10,7 +10,7 @@ if [ -z "$CMSSW_BASE" ]; then
  echo "creating "$cmsswVer
  cmsrel $cmsswVer
  cd $cmsswVer
-elif 
+else 
  cd $CMSSW_BASE
 fi
 cmsenv
