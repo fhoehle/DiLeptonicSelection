@@ -16,6 +16,7 @@ fi
 cmsenv
 cd src
 addpkg AnalysisDataFormats/TopObjects         V06-07-09
+addpkg DataFormats/PatCandidates                        V06-04-19-05
 addpkg TopQuarkAnalysis/Configuration         V06-01-14-04
 addpkg TopQuarkAnalysis/Examples              V06-07-10
 addpkg TopQuarkAnalysis/TopEventProducers     V06-07-14
