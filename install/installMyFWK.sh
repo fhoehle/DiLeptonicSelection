@@ -34,6 +34,7 @@ addpkg PhysicsTools/PatUtils                            V03-09-18
 addpkg PhysicsTools/SelectorUtils                       V00-03-24      
 addpkg PhysicsTools/UtilAlgos                           V08-02-14
 addpkg CommonTools/ParticleFlow                         B4_2_X_V00-03-05
+addpkg PhysicsTools/Utilities                           V08-03-17
 git clone git@github.com:fhoehle/CMSSW_MyAnalyzers.git
 git clone git@github.com:fhoehle/CMSSW_MyProducers.git
 
