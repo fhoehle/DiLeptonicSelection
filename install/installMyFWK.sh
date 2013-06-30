@@ -7,13 +7,17 @@ echo "Installing My FWK "
 #
 export SCRAM_ARCH=slc5_amd64_gcc434
 if [ -z "$CMSSW_BASE" ]; then
- echo "creating "$cmsswVer
- cmsrel $cmsswVer
- cd $cmsswVer
+ if [[ "$PWD" =~ "$cmsswVer" ]]; then
+   echo "you forgot cmsenv"
+ else
+  echo "creating "$cmsswVer
+  scramv1 project CMSSW $cmsswVer # this is cmsrel 
+  cd $cmsswVer
+ fi
 else 
  cd $CMSSW_BASE
 fi
-cmsenv
+eval `scramv1 runtime -sh` # this is cmsenv
 cd src
 addpkg AnalysisDataFormats/TopObjects         V06-07-09
 addpkg DataFormats/PatCandidates                        V06-04-19-05
