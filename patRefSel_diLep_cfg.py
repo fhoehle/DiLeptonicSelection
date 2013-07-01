@@ -111,7 +111,7 @@ globalTagMC   = 'START42_V17'
 ### Output
 
 # output file
-outputFile = 'patRefSel_muJets.root'
+outputFile = 'patRefSel_diLep_cfg_output.root'
 
 # event frequency of Fwk report
 fwkReportEvery = 1
@@ -671,7 +671,7 @@ if runPF2PAT:
   Zmax=106;Zmin=76
   debugIt = True
   if debugIt:
-   process.TFileService=cms.Service("TFileService",fileName=cms.string('debughistos.root'))
+   process.TFileService=cms.Service("TFileService",fileName=cms.string('patRefSel_diLep_cfg_debughistos.root'))
    candPtHistogram = cms.PSet(min = cms.untracked.double(0), max = cms.untracked.double(400), nbins =  cms.untracked.int32 (200), name = cms.untracked.string('Pt'), description  = cms.untracked.string(''), plotquantity = cms.untracked.string('pt'))
    candEtaHistogram = cms.PSet(min = cms.untracked.double(-5), max = cms.untracked.double(5), nbins =  cms.untracked.int32 (200), name = cms.untracked.string('Eta'), description  = cms.untracked.string(''), plotquantity = cms.untracked.string('eta'))
   #executeDiMuonPath = True 
@@ -835,7 +835,7 @@ process.addMyPileupInfo = cms.EDProducer("AddPileUpWeightsProducer", vertexSrc =
    PUHistname1 = cms.string("histoMCPU"), PUHistname2 = cms.string("pileup")); process.simpleProd += process.addMyPileupInfo
 process.MessageLogger.debugModules.extend(['addMyPileupInfo','addPileupInfo'])
 process.MessageLogger.destinations.append('myDebugFile')
-process.MessageLogger.myDebugFile = cms.untracked.PSet(threshold = cms.untracked.string('INFO'))
+process.MessageLogger.myDebugFile = cms.untracked.PSet(threshold = cms.untracked.string('INFO'),filename = cms.untracked.string('patRefSel_diLep_cfg_myDebugFile.log'))
 #process.addMyBTagWeights = cms.EDProducer("AddMyBTagWeights"); process.simpleProd += process.addMyBTagWeights
 process.out.SelectEvents.SelectEvents.append( 'simpleProd' )
 # Compute the mean pt per unit area (rho) from the
