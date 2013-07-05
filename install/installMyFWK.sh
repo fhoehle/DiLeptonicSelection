@@ -39,7 +39,15 @@ addpkg PhysicsTools/SelectorUtils                       V00-03-24
 addpkg PhysicsTools/UtilAlgos                           V08-02-14
 addpkg CommonTools/ParticleFlow                         B4_2_X_V00-03-05
 addpkg PhysicsTools/Utilities                           V08-03-17
+
 git clone git@github.com:fhoehle/CMSSW_MyAnalyzers.git
-git clone git@github.com:fhoehle/CMSSW_MyProducers.git
+cd CMSSW_MyAnalyzers
+git checkout V00-01
+cd $CMSSW_BASE/src
+
+git clone git@github.com:fhoehle/CMSSW_MyProducers.git 
+cd CMSSW_MyProducers
+git checkout V00-01
+cd $CMSSW_BASE/src
 
 scram b -j 5
