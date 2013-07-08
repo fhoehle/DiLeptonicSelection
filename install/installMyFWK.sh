@@ -1,8 +1,18 @@
 #!/bin/bash
 
 cmsswVer=CMSSW_4_2_8_patch7
+function getGitPackage {
+echo "getting "$1
+if [ -d "$1" ]; then
+  cd $1
+  git fetch
+else
+  git clone git@github.com:fhoehle/$1.git
+  cd $1
+fi
 
-
+}
+####
 echo "Installing My FWK "
 #
 export SCRAM_ARCH=slc5_amd64_gcc434
@@ -48,7 +58,13 @@ addpkg PhysicsTools/SelectorUtils                       V00-03-24
 addpkg PhysicsTools/UtilAlgos                           V08-02-14
 addpkg CommonTools/ParticleFlow                         B4_2_X_V00-03-05
 addpkg PhysicsTools/Utilities                           V08-03-17
-git clone git@github.com:fhoehle/CMSSW_MyAnalyzers.git
-git clone git@github.com:fhoehle/CMSSW_MyProducers.git
+#####
+getGitPackage "CMSSW_MyAnalyzers"
+git checkout V00-01 
+cd $CMSSW_BASE/src
+###
+getGitPackage "CMSSW_MyProducers"
+git checkout V00-02
+cd $CMSSW_BASE/src
 
 scram b -j 5
