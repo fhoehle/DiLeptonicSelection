@@ -19,6 +19,15 @@ else
 fi
 eval `scramv1 runtime -sh` # this is cmsenv
 cd src
+# check kerberos
+klist -s
+rc=$?
+if [[ $rc != 0 ]] ; then
+    echo "kerberos credentials missing"
+    klist -c
+    exit $rc
+fi
+########### checkouts
 addpkg AnalysisDataFormats/TopObjects         V06-07-09
 addpkg DataFormats/PatCandidates                        V06-04-19-05
 addpkg TopQuarkAnalysis/Configuration         V06-01-14-04
