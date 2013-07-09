@@ -829,6 +829,7 @@ process.out.outputCommands = cms.untracked.vstring('keep *_*_*_'+process.name_()
 
 # simple production
 process.simpleProd = cms.Path()
+process.myGenEvent10Parts = cms.EDProducer('MyTTbarGenEvent10Parts'); process.simpleProd += process.myGenEvent10Parts
 process.addMyPileupInfo = cms.EDProducer("AddPileUpWeightsProducer", vertexSrc = cms.InputTag("offlinePrimaryVertices"),
    pileupFile1 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/input/JeremyFWK_PU3DMC.root"),
    pileupFile2 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/input/JeremyFWK_dataPUhisto_2011AB_73.5mb_pixelLumi_diffBinning_bin25.root"),
