@@ -66,5 +66,9 @@ cd $CMSSW_BASE/src
 getGitPackage "CMSSW_MyProducers"
 git checkout V00-02
 cd $CMSSW_BASE/src
+###
+getGitPackage "CMSSW_MyDataFormats"
+git checkout V00-01
+cd $CMSSW_BASE/src
 
 scram b -j 5
