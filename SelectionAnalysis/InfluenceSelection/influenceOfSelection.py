@@ -1,7 +1,9 @@
 import ROOT
 ROOT.gROOT.SetBatch()
 from DataFormats.FWLite import Events, Handle
-import commands,getopt,sys
+import commands,getopt,sys,os
+sys.path.append(os.getenv('HOME')+'/PyRoot_Helpers/PyRoot_Functions')
+import MyHistFunctions_cfi as MyHistFunctions
 #commandLine parsing
 opts, args = getopt.getopt(sys.argv[1:], '',['input='])
 input=None
@@ -20,7 +22,9 @@ myTrigResultslabel=("TriggerResults");myTrigResultshandle=Handle("edm::TriggerRe
 # collections
 myMuonHandle=Handle("vector<pat::Muon>");myMuonLabel=("selectedPatMuonsPF")
 # hists
+histMan = MyHistFunctions.MyHistManager("controlPlots")
 muonPt = ROOT.TH1F("muonPt","",100,0,400)
+numMuons = ROOT.TH1F("muonNum","",5,-0.5,4.5)
 ######### looping events 
 for i,event in enumerate(events):
  event.getByLabel(myTrigResultslabel,myTrigResultshandle); myTrigResults=myTrigResultshandle.product()
@@ -39,11 +43,12 @@ for i,event in enumerate(events):
  event.getByLabel(myMuonLabel,myMuonHandle); selectedMuons=myMuonHandle.product()
  #event.getByLabel(myDiLepCandLabel,myDiLepCandHandle); diLepCands = myDiLepCandHandle.product()
  if myTrigResults[TriggerNames.triggerIndex("myDiMuonPath")].accept() and trigResultsHLT[TriggerNamesHLT.triggerIndex("HLT_DoubleMu7_v8")].accept():
+  numMuons.Fill(len(selectedMuons))
   for muon in selectedMuons:
    muonPt.Fill(muon.pt())
  #for diLepCand in diLepCands:
  # diLepCandMass.Fill(diLepCand.mass())
-can = ROOT.TCanvas("c","",200,10,800,300); can.Divide(2,1)
-can.cd(1); muonPt.Draw()
-can.SaveAs("test.pdf")
+histMan.saveHist(numMuons)
+histMan.saveHist(muonPt)
+histMan.done()
 
