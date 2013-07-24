@@ -18,6 +18,8 @@ options.register ('eventsToProcess',
                    VarParsing.multiplicity.list,
                    VarParsing.varType.string,
                    "Events to process")
+options.register('runOnTTbar',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'runOnTTbar')
+#options.register('filterSignal',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'filterSignal')
 options.parseArguments()
 import FWCore.ParameterSet.Config as cms
 #def analyzeCollection(coll):
@@ -774,10 +776,8 @@ if options.outputFile != str('output.root'):
  process.out.fileName = options.outputFile
 process.out.outputCommands = cms.untracked.vstring('keep *_*_*_'+process.name_(),'keep  *_addPileupInfo_*_*', 'keep *_generator_*_*','keep *_addBTagWeights_*_*','keep *_addPileupInfo_*_*' )
 
-
 # simple production
 process.simpleProd = cms.Path()
-process.myGenEvent10Parts = cms.EDProducer('MyTTbarGenEvent10Parts'); process.simpleProd += process.myGenEvent10Parts
 process.addMyPileupInfo = cms.EDProducer("AddPileUpWeightsProducer", vertexSrc = cms.InputTag("offlinePrimaryVertices"),
    pileupFile1 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/input/JeremyFWK_PU3DMC.root"),
    pileupFile2 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/input/JeremyFWK_dataPUhisto_2011AB_73.5mb_pixelLumi_diffBinning_bin25.root"),
@@ -788,4 +788,12 @@ process.MessageLogger.myDebugFile = cms.untracked.PSet(threshold = cms.untracked
 #process.addMyBTagWeights = cms.EDProducer("AddMyBTagWeights"); process.simpleProd += process.addMyBTagWeights
 process.out.SelectEvents.SelectEvents.append( 'simpleProd' )
 # Compute the mean pt per unit area (rho) from the
-
+if options.runOnTTbar:
+  print "attention using genMC ttbar di lep cut"
+  process.myttbarGenEvent10Parts = cms.EDProducer('MyTTbarGenEvent10Parts')
+  for pName in process.paths.keys():
+    getattr(process,pName).insert(0,process.myttbarGenEvent10Parts)
+  process.diLepMcFilter = cms.EDFilter('DiLepMcFilter', ttbarEventTag = cms.untracked.InputTag("myTTbarGenEvent10Parts")    )
+  #if options.filterSignal:
+  print "tagging di lep signal"
+  process.isDiLepPath = cms.Path(process.myttbarGenEvent10Parts*process.diLepMcFilter)
