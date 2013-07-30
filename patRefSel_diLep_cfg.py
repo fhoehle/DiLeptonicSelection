@@ -21,10 +21,8 @@ options.register ('eventsToProcess',
                    VarParsing.varType.string,
                    "Events to process")
 options.register('runOnTTbar',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'runOnTTbar')
-#options.register('filterSignal',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'filterSignal')
 options.parseArguments()
 import FWCore.ParameterSet.Config as cms
-#def analyzeCollection(coll):
 def analyzeColl(coll,path,process,prefix=''):
  newmod = cms.EDAnalyzer("MyCandPrintAnalyzer", src = cms.InputTag(coll), prefix = cms.string(prefix+"test"+coll),
     quantity = cms.vstring('px', 'py', 'pz', 'energy', 'pt', 'eta', 'phi'))
@@ -532,100 +530,8 @@ if runPF2PAT:
     cut = cms.string('isTrackerMuon && isGlobalMuon && globalTrack.normalizedChi2 < 10. && innerTrack.numberOfValidHits > 10 && globalTrack.hitPattern.numberOfValidMuonHits > 0 && abs(eta) < 2.4 && pt > 20. && abs(dB) < 0.02 && (neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20') )
   process.mySelectedPatMuons2p1 =cms.EDFilter("PATMuonSelector", src = cms.InputTag("mySelectedPatMuons"), cut = cms.string('abs(eta) < 2.1' )  )
   pPF += process.mySelectedPatMuons; pPF += process.mySelectedPatMuons2p1 
-  process.simpleCutBasedElectronID = cms.EDProducer("EleIdCutBasedExtProducer",
-    src = cms.InputTag("gsfElectrons"),
-    reducedBarrelRecHitCollection = cms.InputTag("reducedEcalRecHitsEB"),
-    reducedEndcapRecHitCollection = cms.InputTag("reducedEcalRecHitsEE"),
-    verticesCollection = cms.InputTag("offlineBeamSpot"),
-    dataMagneticFieldSetUp = cms.bool(False),
-    dcsTag = cms.InputTag("scalersRawToDigi"),                                          
-    algorithm = cms.string('eIDCB'),
-    electronIDType  = cms.string('robust'),
-    electronQuality = cms.string('test'),
-    electronVersion = cms.string('V04'),
-    #### Selections with Relative Isolation                                          
-    robust95relIsoEleIDCutsV04 = cms.PSet(
-           barrel =  cms.vdouble(5.0e-01, 1.0e-02, 8.0e-01, 7.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 1.5e-01, 
-                                 2.0e+00, 1.2e-01, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-           endcap =  cms.vdouble(7.0e-02, 3.0e-02, 7.0e-01, 1.0e-02, -1, -1, 9999., 9999., 9999., 9999., 9999., 8.0e-02, 
-                                 6.0e-02, 5.0e-02, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-    ),
-    robust90relIsoEleIDCutsV04 = cms.PSet(
-           barrel =  cms.vdouble(1.2e-01, 1.0e-02, 8.0e-01, 7.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 1.2e-01, 
-                                 9.0e-02, 1.0e-01, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.02, 0.02, ),
-           endcap =  cms.vdouble(5.0e-02, 3.0e-02, 7.0e-01, 9.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 5.0e-02, 
-                                 6.0e-02, 3.0e-02, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.02, 0.02, ),
-    ),
-    robust85relIsoEleIDCutsV04 = cms.PSet(
-           barrel =  cms.vdouble(4.0e-02, 1.0e-02, 6.0e-02, 6.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 9.0e-02, 
-                                 8.0e-02, 1.0e-01, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.02, 0.02, ),
-           endcap =  cms.vdouble(2.5e-02, 3.0e-02, 4.0e-02, 7.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 5.0e-02, 
-                                 5.0e-02, 2.5e-02, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.02, 0.02, ),
-    ),
-    robust80relIsoEleIDCutsV04 = cms.PSet(
-           barrel =  cms.vdouble(4.0e-02, 1.0e-02, 6.0e-02, 4.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 9.0e-02, 
-                                 7.0e-02, 1.0e-01, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 0, -1, 0.02, 0.02, ),
-           endcap =  cms.vdouble(2.5e-02, 3.0e-02, 3.0e-02, 7.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 4.0e-02, 
-                                 5.0e-02, 2.5e-02, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 0, -1, 0.02, 0.02, ),
-    ),
-    # 70% point modified with restricting cuts to physical values                                                                                    
-    robust70relIsoEleIDCutsV04 = cms.PSet(
-           barrel =  cms.vdouble(2.5e-02, 1.0e-02, 3.0e-02, 4.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 5.0e-02, 
-                                 6.0e-02, 3.0e-02, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 0, -1, 0.02, 0.02, ),
-           endcap =  cms.vdouble(2.5e-02, 3.0e-02, 2.0e-02, 5.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 2.5e-02, 
-                                 2.5e-02, 2.0e-02, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 0, -1, 0.02, 0.02, ),
-    ),
-    # 60% point modified with restricting cuts to physical values                                                                                    
-    robust60relIsoEleIDCutsV04 = cms.PSet(
-           barrel =  cms.vdouble(2.5e-02, 1.0e-02, 2.5e-02, 4.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 4.0e-02, 
-                                 4.0e-02, 3.0e-02, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 0, -1, 0.02, 0.02, ),
-           endcap =  cms.vdouble(2.5e-02, 3.0e-02, 2.0e-02, 5.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 2.5e-02, 
-                                 2.0e-02, 2.0e-02, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 0, -1, 0.02, 0.02, ),
-    ),
-    #### Selections with Combined Isolation
-
-    robust95cIsoEleIDCutsV04 = cms.PSet(
-           barrel =  cms.vdouble(5.0e-01, 1.0e-02, 8.0e-01, 7.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                                 9999., 9999., 9999., 9999., 9999., 1.5e-01, 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-           endcap =  cms.vdouble(7.0e-02, 3.0e-02, 7.0e-01, 1.0e-02, -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                                 9999., 9999., 9999., 9999., 9999., 1.0e-01, 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-    ),
-    robust90cIsoEleIDCutsV04 = cms.PSet(
-           barrel =  cms.vdouble(1.2e-01, 1.0e-02, 8.0e-01, 7.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                                 9999., 9999., 9999., 9999., 9999., 1.0e-01, 0.0, -9999., 9999., 9999., 1, -1, 0.02, 0.02, ),
-           endcap =  cms.vdouble(5.0e-02, 3.0e-02, 7.0e-01, 9.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                                 9999., 9999., 9999., 9999., 9999., 7.0e-02, 0.0, -9999., 9999., 9999., 1, -1, 0.02, 0.02, ),
-    ),
-    robust85cIsoEleIDCutsV04 = cms.PSet(
-           barrel =  cms.vdouble(4.0e-02, 1.0e-02, 6.0e-02, 6.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                                 9999., 9999., 9999., 9999., 9999., 9.0e-02, 0.0, -9999., 9999., 9999., 1, -1, 0.02, 0.02, ),
-           endcap =  cms.vdouble(2.5e-02, 3.0e-02, 4.0e-02, 7.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                                 9999., 9999., 9999., 9999., 9999., 6.0e-02, 0.0, -9999., 9999., 9999., 1, -1, 0.02, 0.02, ),
-    ),
-    robust80cIsoEleIDCutsV04 = cms.PSet(
-           barrel =  cms.vdouble(4.0e-02, 1.0e-02, 6.0e-02, 4.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                                 9999., 9999., 9999., 9999., 9999., 7.0e-02, 0.0, -9999., 9999., 9999., 0, -1, 0.02, 0.02, ),
-           endcap =  cms.vdouble(2.5e-02, 3.0e-02, 3.0e-02, 7.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                                 9999., 9999., 9999., 9999., 9999., 6.0e-02, 0.0, -9999., 9999., 9999., 0, -1, 0.02, 0.02, ),
-    ),
-    # 70% point modified with restricting cuts to physical values                                          
-    robust70cIsoEleIDCutsV04 = cms.PSet(
-           barrel =  cms.vdouble(2.5e-02, 1.0e-02, 3.0e-02, 4.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                                 9999., 9999., 9999., 9999., 9999., 4.0e-02, 0.0, -9999., 9999., 9999., 0, -1, 0.02, 0.02, ),
-           endcap =  cms.vdouble(2.5e-02, 3.0e-02, 2.0e-02, 5.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                                 9999., 9999., 9999., 9999., 9999., 3.0e-02, 0.0, -9999., 9999., 9999., 0, -1, 0.02, 0.02, ),
-    ),
-    # 60% point modified with restricting cuts to physical values
-    robust60cIsoEleIDCutsV04 = cms.PSet(
-           barrel =  cms.vdouble(2.5e-02, 1.0e-02, 2.5e-02, 4.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                                 9999., 9999., 9999., 9999., 9999., 3.0e-02, 0.0, -9999., 9999., 9999., 0, -1, 0.02, 0.02, ),
-           endcap =  cms.vdouble(2.5e-02, 3.0e-02, 2.0e-02, 5.0e-03, -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                                 9999., 9999., 9999., 9999., 9999., 2.0e-02, 0.0, -9999., 9999., 9999., 0, -1, 0.02, 0.02, ),
-    ),
-
-  )
-  process.simpleEleId90cIso = process.simpleCutBasedElectronID.clone()
-  process.simpleEleId90cIso.electronQuality = '90cIso'
+  myElectronCutBasedId_cfi = imp.load_source('module.name', os.getenv('CMSSW_BASE')+'/DiLeptonicSelection/myElectronCutBasedId_cfi.py')
+  process.simpleEleId90cIso = myElectronCutBasedId_cfi.simpleEleId90cIso
   process.pfIsolatedElectronsPF.isolationCut = 99
   process.pfPileUpIsoPF.Vertices = cms.InputTag("goodOfflinePrimaryVertices")
   process.elPFIsoValueGamma03PFIdPF.deposits[0].vetos = cms.vstring('Threshold(0.5)')
@@ -654,22 +560,11 @@ if runPF2PAT:
   )
   pPF += process.mySelectedPatElectrons; pPF += process.cleanPatJetsPF
   process.addBTagWeights = cms.EDProducer("AddMyBTagWeights",jetSrc = cms.InputTag("cleanPatJetsPF")); pPF += process.addBTagWeights
-  ## pileupWeight
-  process.addPileupInfo = cms.EDProducer("AddPileUpWeightsProducer",
-                                  vertexSrc = cms.InputTag("offlinePrimaryVertices"),
-  pileupFile1 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/input/JeremyFWK_PU3DMC.root"),
-  pileupFile2 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/input/JeremyFWK_dataPUhisto_2011AB_73.5mb_pixelLumi_diffBinning_bin25.root"),
-  PUHistname1 = cms.string("histoMCPU"),
-  PUHistname2 = cms.string("pileup")
-)
-  pPF +=process.addPileupInfo
   from PhysicsTools.PatAlgos.tools.pfTools import *
   #adaptPFTaus( process, tauType='hpsPFTau', postfix=postfix )
   debugIt = True
   if debugIt:
    process.TFileService=cms.Service("TFileService",fileName=cms.string('patRefSel_diLep_cfg_debughistos.root'))
-   candPtHistogram = cms.PSet(min = cms.untracked.double(0), max = cms.untracked.double(400), nbins =  cms.untracked.int32 (200), name = cms.untracked.string('Pt'), description  = cms.untracked.string(''), plotquantity = cms.untracked.string('pt'))
-   candEtaHistogram = cms.PSet(min = cms.untracked.double(-5), max = cms.untracked.double(5), nbins =  cms.untracked.int32 (200), name = cms.untracked.string('Eta'), description  = cms.untracked.string(''), plotquantity = cms.untracked.string('eta'))
   # DI Muon Signal 
   if executeDiMuonPath:
     diMuon_cfg.doDiMuonPath(process,pPF,True)
@@ -678,101 +573,11 @@ if runPF2PAT:
   if executeDiElectronPath:
     diElectron_cfg.doDiElectronPath(process,pPF,True)
     ## my electron selection
-#    process.myDiElectronPath = cms.Path(pPF._seq); localPath = process.myDiElectronPath
-#    process.myDiElectronTriggerCheck = cms.EDFilter("TriggerResultsFilter",l1tIgnoreMask = cms.bool(False),l1tResults = cms.InputTag(""),l1techIgnorePrescales = cms.bool(False),    hltResults = cms.InputTag("TriggerResults","","HLT"),  triggerConditions = cms.vstring(diElectronTriggers),throw = cms.bool(False), daqPartitions = cms.uint32(1));  localPath += process.myDiElectronTriggerCheck;#analyzeColl("patElectronsPF",localPath,process,"diETriggerOK")
-#    coll='patElectronsPF'
-#    process.myTestAnalyzer = cms.EDAnalyzer("MyCandPrintAnalyzer", src = cms.InputTag(coll), prefix = cms.string("test"+coll),
-#    quantity = cms.vstring('px', 'py', 'pz', 'energy', 'pt', 'eta', 'phi','gsfTrack.trackerExpectedHitsInner.numberOfLostHits' ,'abs(userFloat("deltaCotTheta"))',' abs(userFloat("deltaDistance"))', 'electronID("simpleEleId90cIso")','(neutralHadronIso + chargedHadronIso + photonIso)/pt','neutralHadronIso ',' chargedHadronIso ',' photonIso','abs(dB)'));localPath += process.myTestAnalyzer
-#    if debugIt:debugCollection('mySelectedPatElectrons',localPath,cms.VPSet(candPtHistogram,candEtaHistogram),process);#analyzeColl("mySelectedPatElectrons",localPath,process,"diETriggerOK")
-#    process.mySelectedPatElectronsMinCount = cms.EDFilter("PATCandViewCountFilter", maxNumber = cms.uint32(99), src = cms.InputTag("mySelectedPatElectrons"), minNumber = cms.uint32(2)); process.mySelectedPatElectronsMaxCount = cms.EDFilter("PATCandViewCountFilter", maxNumber = cms.uint32(2), src = cms.InputTag("mySelectedPatElectrons"), minNumber = cms.uint32(0)); localPath += process.mySelectedPatElectronsMinCount; localPath += process.mySelectedPatElectronsMaxCount
-#    process.DiLepCandElectrons = cms.EDProducer("DiLepCandProducer",srcColl1 = cms.InputTag("mySelectedPatElectrons"), srcColl2 = cms.InputTag("mySelectedPatElectrons"),cut = cms.string("mass >= 20 "),pairCut = cms.string("(abs(ele1.pt - ele2.pt) > 0.1 || abs(ele1.px - ele2.px) > 0.1) && abs(ele1.charge - ele2.charge) > 0.1 &&  totalP4.M >= 20")); localPath += process.DiLepCandElectrons;#analyzeColl("mySelectedPatElectrons",localPath,process,"diElTestEls");analyzeColl("DiLepCandElectrons",localPath,process,"diElTestEls") 
-#    if debugIt:debugCollection('DiLepCandElectrons',localPath,cms.VPSet(candPtHistogram,candEtaHistogram),process);
-#    process.DiLepCandElectronsCount = cms.EDFilter("PATCandViewCountFilter", maxNumber = cms.uint32(99), src = cms.InputTag("DiLepCandElectrons"), minNumber = cms.uint32(1));AddFilters.AddFilter(process.DiLepCandElectronsCount,localPath,process);#analyzeColl("DiLepCandElectrons",localPath,process,"DiLepEleCandOK");
-#    process.ElectronsUsedForDiLepCand = cms.EDProducer("PATElectronCleaner",
-#      src = cms.InputTag("mySelectedPatElectrons"),
-#      preselection = cms.string(''),# preselection (any string-based cut for pat::Muon)
-#      checkOverlaps = cms.PSet(# overlap checking configurables
-#          muons = cms.PSet(
-#             src       = cms.InputTag("DiLepCandElectrons"),
-#             algorithm = cms.string("byDeltaR"),
-#             preselection        = cms.string(""),  # don't preselect the muons
-#             deltaR              = cms.double(9999),
-#             checkRecoComponents = cms.bool(False), # don't check if they share some AOD object ref
-#             pairCut             = cms.string('abs(cand1.pt-cand2.daughter("p1").pt)> 0.1 && abs(cand1.pt-cand2.daughter("p2").pt) > 0.1 '),
-#             requireNoOverlaps   = cms.bool(True), # overlaps don't cause the electron to be discared
-#          )
-#      ),
-#      finalCut = cms.string(''),# finalCut (any string-based cut for pat::Muon)
-#    ); localPath += process.ElectronsUsedForDiLepCand
-#    if debugIt:debugCollection('ElectronsUsedForDiLepCand',localPath,cms.VPSet(candPtHistogram,candEtaHistogram),process,"DiLepCandOkDiEl");
-#    process.cleanJetsDiElectron = process.cleanPatJetsPF.clone();process.cleanJetsDiElectron.checkOverlaps = cms.PSet(    electrons = cms.PSet(src = cms.InputTag("ElectronsUsedForDiLepCand"),deltaR = cms.double(0.4),
-#        pairCut = cms.string(''), checkRecoComponents = cms.bool(False),
-#        algorithm = cms.string('byDeltaR'), preselection = cms.string(''), requireNoOverlaps = cms.bool(True))    );  localPath += process.cleanJetsDiElectron; 
-#    if debugIt:debugCollection('cleanJetsDiElectron',localPath,cms.VPSet(candPtHistogram,candEtaHistogram),process);
-#    process.DiLepCandElectronsZVeto = cms.EDFilter("PATCompositeCandidateRefSelector", src = cms.InputTag("DiLepCandElectrons"), cut = cms.string("mass < "+str(Zmin) + " || mass > "+str(Zmax)) ); localPath += process.DiLepCandElectronsZVeto; process.DiLepCandElectronsZVetoCount = cms.EDFilter("PATCandViewCountFilter", maxNumber = cms.uint32(99), src = cms.InputTag("DiLepCandElectronsZVeto"), minNumber = cms.uint32(1));AddFilters.AddFilter(process.DiLepCandElectronsZVetoCount,localPath,process);#analyzeColl("DiLepCandElectronsZVeto",localPath,process,"diEleZVetoOK")
-#    process.cleanJetsDiElectronCount = cms.EDFilter("CandViewCountFilter", src = cms.InputTag("cleanJetsDiElectron"), minNumber = cms.uint32(2) ); AddFilters.AddFilter(process.cleanJetsDiElectronCount,localPath,process);
-#    process.addBTagWeightsDiE = cms.EDProducer("AddMyBTagWeights",jetSrc = cms.InputTag("cleanJetsDiElectron")); localPath += process.addBTagWeightsDiE 
-#    if debugIt:debugCollection('cleanJetsDiElectron',localPath,cms.VPSet(candPtHistogram,candEtaHistogram),process,"DiEJetMOK");#analyzeColl("cleanJetsDiElectron",localPath,process,"cleanJetsDiElectronJetMOK");
-#    process.DiElectronmyselectedPatMETs = cms.EDFilter("PATMETSelector",  src = cms.InputTag("patMETsPF"),     cut = cms.string("energy > 40") ); localPath += process.DiElectronmyselectedPatMETs
-#    #if debugIt:debugCollection('DiMuonmyselectedPatMETs',localPath,cms.VPSet(candPtHistogram,candEtaHistogram),process);
-#    process.DiElectronmyselectedPatMETsCount = cms.EDFilter("CandViewCountFilter", src = cms.InputTag("DiElectronmyselectedPatMETs"), minNumber = cms.uint32(1) ); AddFilters.AddFilter(process.DiElectronmyselectedPatMETsCount,localPath,process);
   # Di EMu Signal
-  #executeDiElectronMuonPath = True
   if executeDiElectronMuonPath: 
     diEleMuon_cfg.doDiEleMuonPath(process,pPF,True)
     ##DiElectronMuon
-#    process.myDiElectronMuonPath = cms.Path(pPF._seq);localPath = process.myDiElectronMuonPath
-#    process.myMuonElectronTriggerCheck = cms.EDFilter("TriggerResultsFilter",l1tIgnoreMask = cms.bool(False),l1tResults = cms.InputTag(""),l1techIgnorePrescales = cms.bool(False),    hltResults = cms.InputTag("TriggerResults","","HLT"),  triggerConditions = cms.vstring(MuonElectronTriggers),throw = cms.bool(False), daqPartitions = cms.uint32(1)); localPath += process.myMuonElectronTriggerCheck;#analyzeColl("patElectronsPF",localPath,process,"diEMuTriggerOK");analyzeColl("mySelectedPatMuons2p1",localPath,process,"Muon2p1")
-#    #if debugIt:debugCollection('mySelectedPatElectrons',localPath,cms.VPSet(candPtHistogram,candEtaHistogram),process,"DiEMu");
-#    process.mySelectedPatElectronsMuonsMinCount = cms.EDFilter("PATCandViewCountFilter", maxNumber = cms.uint32(99), src = cms.InputTag("mySelectedPatElectrons"), minNumber = cms.uint32(1));    localPath += process.mySelectedPatElectronsMuonsMinCount
-#    process.mySelectedPatMuonsElectronsMinCount = cms.EDFilter("PATCandViewCountFilter", maxNumber = cms.uint32(99), src = cms.InputTag("mySelectedPatMuons2p1"), minNumber = cms.uint32(1))
-#    #if debugIt:debugCollection('mySelectedPatMuons2p1',localPath,cms.VPSet(candPtHistogram,candEtaHistogram),process,"DiEMu");
-#    localPath += process.mySelectedPatMuonsElectronsMinCount
-#    process.DiLepCandEMu = cms.EDProducer("DiLepCandProducer",srcColl1 = cms.InputTag("mySelectedPatElectrons"), srcColl2 = cms.InputTag("mySelectedPatMuons2p1"),cut = cms.string("mass > 20 "),pairCut = cms.string("(abs(cand1.pt - cand2.pt) > 0.01 || abs(cand1.px - cand2.px) > 0.01) && abs(cand1.charge - cand2.charge) > 0.01 &&  totalP4.M > 20")); localPath += process.DiLepCandEMu; process.DiLepCandEMuCount = cms.EDFilter("PATCandViewCountFilter", maxNumber = cms.uint32(99), src = cms.InputTag("DiLepCandEMu"), minNumber = cms.uint32(1)); AddFilters.AddFilter(process.DiLepCandEMuCount,localPath,process);#analyzeColl("DiLepCandEMu",localPath,process,"DiLepEMuCandOKZVetoAlso");
-#    #analyzeColl("mySelectedPatElectrons",localPath,process,"diEMuDiLepCandOk")
-#    process.ElectronsUsedForDiLepCandEMu = cms.EDProducer("PATElectronCleaner",
-#      src = cms.InputTag("mySelectedPatElectrons"),
-#      preselection = cms.string(''),# preselection (any string-based cut for pat::Muon)
-#      checkOverlaps = cms.PSet(# overlap checking configurables
-#          muons = cms.PSet(
-#             src       = cms.InputTag("DiLepCandEMu"),
-#             algorithm = cms.string("byDeltaR"),
-#             preselection        = cms.string(""),  # don't preselect the muons
-#             deltaR              = cms.double(9999),
-#             checkRecoComponents = cms.bool(False), # don't check if they share some AOD object ref
-#             pairCut             = cms.string('abs(cand1.pt-cand2.daughter("p1").pt)> 0.1 && abs(cand1.pt-cand2.daughter("p2").pt) > 0.1 '),
-#             requireNoOverlaps   = cms.bool(True), # overlaps don't cause the electron to be discared
-#          )
-#      ),
-#      finalCut = cms.string(''),# finalCut (any string-based cut for pat::Muon)
-#    ); localPath += process.ElectronsUsedForDiLepCandEMu;
-#    process.MuonsUsedForDiLepCandEMu = cms.EDProducer("PATMuonCleaner",
-#      src = cms.InputTag("mySelectedPatMuons2p1"),
-#      preselection = cms.string(''),# preselection (any string-based cut for pat::Muon)
-#      checkOverlaps = cms.PSet(# overlap checking configurables
-#          muons = cms.PSet(
-#             src       = cms.InputTag("DiLepCandEMu"),
-#             algorithm = cms.string("byDeltaR"),
-#             preselection        = cms.string(""),  # don't preselect the muons
-#             deltaR              = cms.double(9999),
-#             checkRecoComponents = cms.bool(False), # don't check if they share some AOD object ref
-#             pairCut             = cms.string('abs(cand1.pt-cand2.daughter("p1").pt)> 0.1 && abs(cand1.pt-cand2.daughter("p2").pt) > 0.1 '),
-#             requireNoOverlaps   = cms.bool(True), # overlaps don't cause the electron to be discared
-#          )
-#      ),
-#      finalCut = cms.string(''),# finalCut (any string-based cut for pat::Muon)
-#    ); localPath += process.MuonsUsedForDiLepCandEMu; 
-#    if debugIt:debugCollection('MuonsUsedForDiLepCandEMu',localPath,cms.VPSet(candPtHistogram,candEtaHistogram),process);debugCollection('ElectronsUsedForDiLepCandEMu',localPath,cms.VPSet(candPtHistogram,candEtaHistogram),process);
-#    process.MuonsUsedForDiLepCandEMuCount = cms.EDFilter("CandViewCountFilter", src = cms.InputTag("MuonsUsedForDiLepCandEMu"), minNumber = cms.uint32(1) ); localPath += process.MuonsUsedForDiLepCandEMuCount;process.ElectronsUsedForDiLepCandEMuCount = cms.EDFilter("CandViewCountFilter", src = cms.InputTag("ElectronsUsedForDiLepCandEMu"), minNumber = cms.uint32(1) ); localPath += process.ElectronsUsedForDiLepCandEMuCount
-#    process.cleanJetsDiEMu = process.cleanPatJetsPF.clone();process.cleanJetsDiEMu.checkOverlaps = cms.PSet(    electrons = cms.PSet(src = cms.InputTag("ElectronsUsedForDiLepCandEMu"),deltaR = cms.double(0.4),
-#        pairCut = cms.string(''), checkRecoComponents = cms.bool(False),
-#        algorithm = cms.string('byDeltaR'), preselection = cms.string(''), requireNoOverlaps = cms.bool(True)),muons = cms.PSet(src = cms.InputTag("MuonsUsedForDiLepCandEMu"),deltaR = cms.double(0.4),
-#        pairCut = cms.string(''), checkRecoComponents = cms.bool(False),
-#        algorithm = cms.string('byDeltaR'), preselection = cms.string(''), requireNoOverlaps = cms.bool(True))    );  localPath += process.cleanJetsDiEMu;
-#    #if debugIt:debugCollection('cleanJetsDiEMu',localPath,cms.VPSet(candPtHistogram,candEtaHistogram),process);
-#    process.cleanJetsDiEMuCount = cms.EDFilter("CandViewCountFilter", src = cms.InputTag("cleanJetsDiEMu"), minNumber = cms.uint32(2) ); AddFilters.AddFilter(process.cleanJetsDiEMuCount,localPath,process);
-#    process.addBTagWeightsEMu = cms.EDProducer("AddMyBTagWeights",jetSrc = cms.InputTag("cleanJetsDiEMu"));localPath+=process.addBTagWeightsEMu 
-#    if debugIt:debugCollection('cleanJetsDiEMu',localPath,cms.VPSet(candPtHistogram,candEtaHistogram),process,"diEMuJetMOK");#analyzeColl("cleanJetsDiEMu",localPath,process,"cleanJetsDiEMuJetMOK"); 
+
   ## pPF configuration continues ...
 #
 if options.outputFile != str('output.root'):
@@ -786,7 +591,7 @@ process.addMyPileupInfo = cms.EDProducer("AddPileUpWeightsProducer", vertexSrc =
    pileupFile1 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/input/JeremyFWK_PU3DMC.root"),
    pileupFile2 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/input/JeremyFWK_dataPUhisto_2011AB_73.5mb_pixelLumi_diffBinning_bin25.root"),
    PUHistname1 = cms.string("histoMCPU"), PUHistname2 = cms.string("pileup")); process.simpleProd += process.addMyPileupInfo
-process.MessageLogger.debugModules.extend(['addMyPileupInfo','addPileupInfo'])
+process.MessageLogger.debugModules.extend(['addMyPileupInfo'])
 process.MessageLogger.destinations.append('myDebugFile')
 process.MessageLogger.myDebugFile = cms.untracked.PSet(threshold = cms.untracked.string('INFO'),filename = cms.untracked.string('patRefSel_diLep_cfg_myDebugFile.log'))
 #process.addMyBTagWeights = cms.EDProducer("AddMyBTagWeights"); process.simpleProd += process.addMyBTagWeights
