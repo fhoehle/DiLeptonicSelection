@@ -40,7 +40,6 @@ print "this is cmsRun input: ",sys.argv
 runOnMC = True
 
 # PF2PAT
-runPF2PAT = True
 
 ### Switch on/off selection steps
 
@@ -60,8 +59,6 @@ use3Jets        = False
 use4Jets        = False
 # Step 6
 useBTag         = False
-
-addTriggerMatching = True
 
 ### Reference selection
 
@@ -205,11 +202,7 @@ from PhysicsTools.PatAlgos.tools.coreTools import *
 ### Check JECs
 
 # JEC set
-jecSet      = jecSetBase + 'Calo'
-jecSetAddPF = jecSetBase + pfSuffix
-jecSetPF    = jecSetAddPF
-if usePFnoPU:
-  jecSetPF += 'chs'
+jecSetPF    = jecSetBase + pfSuffix + 'chs' 
 
 # JEC levels
 if useL1FastJet and useL1Offset:
@@ -260,54 +253,17 @@ if runPF2PAT:
   applyPostfix( process, 'pfMuonsFromVertex'    , postfix ).dzCut    = pfDzCut
   applyPostfix( process, 'pfSelectedMuons'      , postfix ).cut = pfMuonSelectionCut
   applyPostfix( process, 'pfIsolatedMuons'      , postfix ).isolationCut = pfMuonCombIsoCut
-  if pfMuonIsoConeR03:
-    applyPostfix( process, 'pfIsolatedMuons', postfix ).isolationValueMapsCharged  = cms.VInputTag( cms.InputTag( 'muPFIsoValueCharged03' + postfix )
-                                                                                                  )
-    applyPostfix( process, 'pfIsolatedMuons', postfix ).deltaBetaIsolationValueMap = cms.InputTag( 'muPFIsoValuePU03' + postfix )
-    applyPostfix( process, 'pfIsolatedMuons', postfix ).isolationValueMapsNeutral  = cms.VInputTag( cms.InputTag( 'muPFIsoValueNeutral03' + postfix )
-                                                                                                  , cms.InputTag( 'muPFIsoValueGamma03' + postfix )
-                                                                                                  )
-    applyPostfix( process, 'pfMuons', postfix ).isolationValueMapsCharged  = cms.VInputTag( cms.InputTag( 'muPFIsoValueCharged03' + postfix )
-                                                                                          )
-    applyPostfix( process, 'pfMuons', postfix ).deltaBetaIsolationValueMap = cms.InputTag( 'muPFIsoValuePU03' + postfix )
-    applyPostfix( process, 'pfMuons', postfix ).isolationValueMapsNeutral  = cms.VInputTag( cms.InputTag( 'muPFIsoValueNeutral03' + postfix )
-                                                                                          , cms.InputTag( 'muPFIsoValueGamma03' + postfix )
-                                                                                          )
-    applyPostfix( process, 'patMuons', postfix ).isolationValues.pfNeutralHadrons   = cms.InputTag( 'muPFIsoValueNeutral03' + postfix )
-    applyPostfix( process, 'patMuons', postfix ).isolationValues.pfChargedAll       = cms.InputTag( 'muPFIsoValueChargedAll03' + postfix )
-    applyPostfix( process, 'patMuons', postfix ).isolationValues.pfPUChargedHadrons = cms.InputTag( 'muPFIsoValuePU03' + postfix )
-    applyPostfix( process, 'patMuons', postfix ).isolationValues.pfPhotons          = cms.InputTag( 'muPFIsoValueGamma03' + postfix )
-    applyPostfix( process, 'patMuons', postfix ).isolationValues.pfChargedHadrons   = cms.InputTag( 'muPFIsoValueCharged03' + postfix )
   applyPostfix( process, 'pfElectronsFromVertex'    , postfix ).vertices = cms.InputTag( pfVertices )
   applyPostfix( process, 'pfElectronsFromVertex'    , postfix ).d0Cut    = pfD0Cut
   applyPostfix( process, 'pfElectronsFromVertex'    , postfix ).dzCut    = pfDzCut
   applyPostfix( process, 'pfSelectedElectrons'      , postfix ).cut = pfElectronSelectionCut
   applyPostfix( process, 'pfIsolatedElectrons'      , postfix ).isolationCut = pfElectronCombIsoCut
-  if pfElectronIsoConeR03:
-    applyPostfix( process, 'pfIsolatedElectrons', postfix ).isolationValueMapsCharged  = cms.VInputTag( cms.InputTag( 'elPFIsoValueCharged03' + postfix )
-                                                                                                      )
-    applyPostfix( process, 'pfIsolatedElectrons', postfix ).deltaBetaIsolationValueMap = cms.InputTag( 'elPFIsoValuePU03' + postfix )
-    applyPostfix( process, 'pfIsolatedElectrons', postfix ).isolationValueMapsNeutral  = cms.VInputTag( cms.InputTag( 'elPFIsoValueNeutral03' + postfix )
-                                                                                                      , cms.InputTag( 'elPFIsoValueGamma03' + postfix )
-                                                                                                      )
-    applyPostfix( process, 'pfElectrons', postfix ).isolationValueMapsCharged  = cms.VInputTag( cms.InputTag( 'elPFIsoValueCharged03' + postfix )
-                                                                                              )
-    applyPostfix( process, 'pfElectrons', postfix ).deltaBetaIsolationValueMap = cms.InputTag( 'elPFIsoValuePU03' + postfix )
-    applyPostfix( process, 'pfElectrons', postfix ).isolationValueMapsNeutral  = cms.VInputTag( cms.InputTag( 'elPFIsoValueNeutral03' + postfix )
-                                                                                              , cms.InputTag( 'elPFIsoValueGamma03' + postfix )
-                                                                                              )
-    applyPostfix( process, 'patElectrons', postfix ).isolationValues.pfNeutralHadrons   = cms.InputTag( 'elPFIsoValueNeutral03' + postfix )
-    applyPostfix( process, 'patElectrons', postfix ).isolationValues.pfChargedAll       = cms.InputTag( 'elPFIsoValueChargedAll03' + postfix )
-    applyPostfix( process, 'patElectrons', postfix ).isolationValues.pfPUChargedHadrons = cms.InputTag( 'elPFIsoValuePU03' + postfix )
-    applyPostfix( process, 'patElectrons', postfix ).isolationValues.pfPhotons          = cms.InputTag( 'elPFIsoValueGamma03' + postfix )
-    applyPostfix( process, 'patElectrons', postfix ).isolationValues.pfChargedHadrons   = cms.InputTag( 'elPFIsoValueCharged03' + postfix )
   applyPostfix( process, 'patElectrons', postfix ).pvSrc = cms.InputTag( pfVertices )
   applyPostfix( process, 'patMuons'    , postfix ).pvSrc = cms.InputTag( pfVertices )
 
 from TopQuarkAnalysis.Configuration.patRefSel_refMuJets_cfi import *
 
 # remove MC matching, object cleaning, objects etc.
-jecLevelsCalo = copy.copy( jecLevels )
 if runPF2PAT:
   if not runOnMC:
     runOnData( process
@@ -432,31 +388,29 @@ if runPF2PAT:
 ### Trigger matching
 ###
 
-if addTriggerMatching:
 
-  if runOnMC:
-    triggerObjectSelection = triggerObjectSelectionMC
-  else:
-    triggerObjectSelection = triggerObjectSelectionData
-  ### Trigger matching configuration
-  from PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cfi import patTrigger
-  from TopQuarkAnalysis.Configuration.patRefSel_triggerMatching_cfi import patMuonTriggerMatch
-  from PhysicsTools.PatAlgos.tools.trigTools import *
-  if runPF2PAT:
-    triggerProducerPF = patTrigger.clone()
-    setattr( process, 'patTrigger' + postfix, triggerProducerPF )
-    triggerMatchPF = patMuonTriggerMatch.clone( matchedCuts = triggerObjectSelection )
-    setattr( process, 'triggerMatch' + postfix, triggerMatchPF )
-    switchOnTriggerMatchEmbedding( process
-                                 , triggerProducer = 'patTrigger' + postfix
-                                 , triggerMatchers = [ 'triggerMatch' + postfix ]
-                                 , sequence        = 'patPF2PATSequence' + postfix
-                                 , postfix         = postfix
+if runOnMC:
+  triggerObjectSelection = triggerObjectSelectionMC
+else:
+  triggerObjectSelection = triggerObjectSelectionData
+### Trigger matching configuration
+from PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cfi import patTrigger
+from TopQuarkAnalysis.Configuration.patRefSel_triggerMatching_cfi import patMuonTriggerMatch
+from PhysicsTools.PatAlgos.tools.trigTools import *
+triggerProducerPF = patTrigger.clone()
+setattr( process, 'patTrigger' + postfix, triggerProducerPF )
+triggerMatchPF = patMuonTriggerMatch.clone( matchedCuts = triggerObjectSelection )
+setattr( process, 'triggerMatch' + postfix, triggerMatchPF )
+switchOnTriggerMatchEmbedding( process
+                             , triggerProducer = 'patTrigger' + postfix
+                             , triggerMatchers = [ 'triggerMatch' + postfix ]
+                             , sequence        = 'patPF2PATSequence' + postfix
+                             , postfix         = postfix
+                             )
+removeCleaningFromTriggerMatching( process
+                                 , sequence = 'patPF2PATSequence' + postfix
                                  )
-    removeCleaningFromTriggerMatching( process
-                                     , sequence = 'patPF2PATSequence' + postfix
-                                     )
-    getattr( process, 'intermediatePatMuons' + postfix ).src = cms.InputTag( 'selectedPatMuons' + postfix + 'TriggerMatch' )
+getattr( process, 'intermediatePatMuons' + postfix ).src = cms.InputTag( 'selectedPatMuons' + postfix + 'TriggerMatch' )
 
 
 ###
@@ -479,106 +433,103 @@ process.eidCiCSequence = cms.Sequence(
 )
 
 # The additional sequence
-if runPF2PAT:
-  patAddOnSequence = cms.Sequence(
-    getattr( process, 'intermediatePatMuons' + postfix )
-  * getattr( process, 'goodPatJets' + postfix )
-  * getattr( process, 'loosePatMuons' + postfix )
-  * getattr( process, 'tightPatMuons' + postfix )
-  )
-  setattr( process, 'patAddOnSequence' + postfix, patAddOnSequence )
+patAddOnSequence = cms.Sequence(
+  getattr( process, 'intermediatePatMuons' + postfix )
+* getattr( process, 'goodPatJets' + postfix )
+* getattr( process, 'loosePatMuons' + postfix )
+* getattr( process, 'tightPatMuons' + postfix )
+)
+setattr( process, 'patAddOnSequence' + postfix, patAddOnSequence )
 
 # The paths
-if runPF2PAT:
+pPF = cms.Path()
+pPF += process.goodOfflinePrimaryVertices
+pPF += process.eidCiCSequence
+pPF += getattr( process, 'patPF2PATSequence' + postfix )
+pPF += getattr( process, 'patAddOnSequence' + postfix )
+process.mySelectedPatMET = cms.EDFilter("PATMETSelector", src = cms.InputTag('patMETs'+postfix), cut = cms.string("pt > 30") );  pPF += process.mySelectedPatMET
+process.pfNoMuonPF.enable = False
+process.pfNoElectronPF.enable = False
+process.pfNoTauPF.enable = False
+process.patMuonsPF.isolationValues = cms.PSet(
+  pfNeutralHadrons = cms.InputTag("muPFIsoValueNeutral03PF"),
+  pfPUChargedHadrons = cms.InputTag("muPFIsoValuePU03PF"),
+  pfPhotons = cms.InputTag("muPFIsoValueGamma03PF"),
+  pfChargedHadrons = cms.InputTag("muPFIsoValueCharged03PF")
+)
+process.pfIsolatedMuonsPF.isolationCut = 99
+process.kt6PFJetsPF.Rho_EtaMax = cms.double(2.5); process.kt6PFJetsPF.doRhoFastjet = cms.bool(True)
+process.kt6PFJetsPF.src = cms.InputTag("particleFlow")
+process.kt6PFJetsPF.doAreaFastjet = False
+process.patJetCorrFactorsPF.primaryVertices = cms.InputTag("offlinePrimaryVertices")
+process.selectedPatJetsPF.cut = cms.string('pt > 30. && abs(eta) < 2.5 && chargedHadronEnergyFraction > 0.0 && chargedEmEnergyFraction < 0.99 && neutralHadronEnergyFraction < 0.99 && neutralEmEnergyFraction < 0.99')
+process.cleanPatJetsPF.checkOverlaps = cms.PSet(    muons = cms.PSet(src = cms.InputTag("mySelectedPatMuons"),deltaR = cms.double(0.4),
+      pairCut = cms.string(''),
+      checkRecoComponents = cms.bool(False),
+      algorithm = cms.string('byDeltaR'),
+      preselection = cms.string(''),
+      requireNoOverlaps = cms.bool(True)),
+      electrons = cms.PSet(src = cms.InputTag("mySelectedPatElectrons"),deltaR = cms.double(0.4),
+      pairCut = cms.string(''),
+      checkRecoComponents = cms.bool(False),
+      algorithm = cms.string('byDeltaR'),
+      preselection = cms.string(''),
+      requireNoOverlaps = cms.bool(True)
+  ))
 
-  pPF = cms.Path()
-  pPF += process.goodOfflinePrimaryVertices
-  pPF += process.eidCiCSequence
-  pPF += getattr( process, 'patPF2PATSequence' + postfix )
-  pPF += getattr( process, 'patAddOnSequence' + postfix )
-  process.mySelectedPatMET = cms.EDFilter("PATMETSelector", src = cms.InputTag('patMETs'+postfix), cut = cms.string("pt > 30") );  pPF += process.mySelectedPatMET
-  process.pfNoMuonPF.enable = False
-  process.pfNoElectronPF.enable = False
-  process.pfNoTauPF.enable = False
-  process.patMuonsPF.isolationValues = cms.PSet(
-    pfNeutralHadrons = cms.InputTag("muPFIsoValueNeutral03PF"),
-    pfPUChargedHadrons = cms.InputTag("muPFIsoValuePU03PF"),
-    pfPhotons = cms.InputTag("muPFIsoValueGamma03PF"),
-    pfChargedHadrons = cms.InputTag("muPFIsoValueCharged03PF")
-  )
-  process.pfIsolatedMuonsPF.isolationCut = 99
-  process.kt6PFJetsPF.Rho_EtaMax = cms.double(2.5); process.kt6PFJetsPF.doRhoFastjet = cms.bool(True)
-  process.kt6PFJetsPF.src = cms.InputTag("particleFlow")
-  process.kt6PFJetsPF.doAreaFastjet = False
-  process.patJetCorrFactorsPF.primaryVertices = cms.InputTag("offlinePrimaryVertices")
-  process.selectedPatJetsPF.cut = cms.string('pt > 30. && abs(eta) < 2.5 && chargedHadronEnergyFraction > 0.0 && chargedEmEnergyFraction < 0.99 && neutralHadronEnergyFraction < 0.99 && neutralEmEnergyFraction < 0.99')
-  process.cleanPatJetsPF.checkOverlaps = cms.PSet(    muons = cms.PSet(src = cms.InputTag("mySelectedPatMuons"),deltaR = cms.double(0.4),
-        pairCut = cms.string(''),
-        checkRecoComponents = cms.bool(False),
-        algorithm = cms.string('byDeltaR'),
-        preselection = cms.string(''),
-        requireNoOverlaps = cms.bool(True)),
- 	electrons = cms.PSet(src = cms.InputTag("mySelectedPatElectrons"),deltaR = cms.double(0.4),
-        pairCut = cms.string(''),
-        checkRecoComponents = cms.bool(False),
-        algorithm = cms.string('byDeltaR'),
-        preselection = cms.string(''),
-        requireNoOverlaps = cms.bool(True)
-    ))
- 
-  process.mySelectedPatMuons = cms.EDFilter("PATMuonSelector", src = cms.InputTag("patMuonsPF"),
-    cut = cms.string('isTrackerMuon && isGlobalMuon && globalTrack.normalizedChi2 < 10. && innerTrack.numberOfValidHits > 10 && globalTrack.hitPattern.numberOfValidMuonHits > 0 && abs(eta) < 2.4 && pt > 20. && abs(dB) < 0.02 && (neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20') )
-  process.mySelectedPatMuons2p1 =cms.EDFilter("PATMuonSelector", src = cms.InputTag("mySelectedPatMuons"), cut = cms.string('abs(eta) < 2.1' )  )
-  pPF += process.mySelectedPatMuons; pPF += process.mySelectedPatMuons2p1 
-  myElectronCutBasedId_cfi = imp.load_source('module.name', os.getenv('CMSSW_BASE')+'/DiLeptonicSelection/myElectronCutBasedId_cfi.py')
-  process.simpleEleId90cIso = myElectronCutBasedId_cfi.simpleEleId90cIso
-  process.pfIsolatedElectronsPF.isolationCut = 99
-  process.pfPileUpIsoPF.Vertices = cms.InputTag("goodOfflinePrimaryVertices")
-  process.elPFIsoValueGamma03PFIdPF.deposits[0].vetos = cms.vstring('Threshold(0.5)')
-  process.elPFIsoValueNeutral03PFIdPF.deposits[0].vetos = cms.vstring('Threshold(0.5)')
-  pPF.replace(process.patElectronsPF,process.simpleEleId90cIso * process.patElectronsPF) #pPF += process.simpleEleId90cIso
-  process.patElectronsPF.electronIDSources.simpleEleId90cIso = cms.InputTag("simpleEleId90cIso")
-  process.patElectronsPF.isolationValues = cms.PSet( pfChargedHadrons = cms.InputTag("elPFIsoValueCharged03PFIdPF"),pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral03PFIdPF"),pfPhotons = cms.InputTag("elPFIsoValueGamma03PFIdPF"))
-  process.AddAdditionalElecConvInfoProducer = cms.EDProducer("AddAdditionalElecConvInfoProducer",eleSrc = cms.InputTag("patElectronsPF"));pPF +=process.AddAdditionalElecConvInfoProducer
-  process.myIntermediateElectrons = cms.EDProducer("PATElectronCleaner", src = cms.InputTag("AddAdditionalElecConvInfoProducer"),
-      preselection = cms.string(''),# preselection (any string-based cut for pat::Muon)
-      checkOverlaps = cms.PSet(# overlap checking configurables
-          muonsTrkOrGl = cms.PSet(
-             src       = cms.InputTag("patMuonsPF"),
-             algorithm = cms.string("byDeltaR"),
-             preselection        = cms.string("isTrackerMuon || isGlobalMuon"),  # don't preselect the muons
-             deltaR              = cms.double(0.1),
-             checkRecoComponents = cms.bool(False), # don't check if they share some AOD object ref
-             pairCut             = cms.string(''),
-             requireNoOverlaps   = cms.bool(False), # overlaps don't cause the electron to be discared
-          )
-      ),
-      finalCut = cms.string(''),# finalCut (any string-based cut for pat::Muon)
-    );pPF += process.myIntermediateElectrons 
-  process.mySelectedPatElectrons = cms.EDFilter("PATElectronSelector", src = cms.InputTag("myIntermediateElectrons"),
-		  cut = cms.string('pt > 20. && abs(eta) < 2.5 && gsfTrack.trackerExpectedHitsInner.numberOfLostHits < 2 && !(abs(userFloat("deltaCotTheta")) < 0.02 && abs(userFloat("deltaDistance")) < 0.02 )  && test_bit(electronID("simpleEleId90cIso"), 0) && (neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.17 && abs(dB) < 0.04 && ecalDrivenSeed && !hasOverlaps("muonsTrkOrGl")')#&& gsfTrack->trackerExpectedHitsInner().numberOfLostHits() < 2 &&test_bit(electronID("simpleEleId90cIso"), 0)')
-  )
-  pPF += process.mySelectedPatElectrons; pPF += process.cleanPatJetsPF
-  process.addBTagWeights = cms.EDProducer("AddMyBTagWeights",jetSrc = cms.InputTag("cleanPatJetsPF")); pPF += process.addBTagWeights
-  from PhysicsTools.PatAlgos.tools.pfTools import *
-  #adaptPFTaus( process, tauType='hpsPFTau', postfix=postfix )
-  debugIt = True
-  if debugIt:
-   process.TFileService=cms.Service("TFileService",fileName=cms.string('patRefSel_diLep_cfg_debughistos.root'))
-  # DI Muon Signal 
-  if executeDiMuonPath:
-    diMuon_cfg.doDiMuonPath(process,pPF,True)
-  #DI Electron Signal
-  #executeDiElectronPath = True
-  if executeDiElectronPath:
-    diElectron_cfg.doDiElectronPath(process,pPF,True)
-    ## my electron selection
-  # Di EMu Signal
-  if executeDiElectronMuonPath: 
-    diEleMuon_cfg.doDiEleMuonPath(process,pPF,True)
-    ##DiElectronMuon
+process.mySelectedPatMuons = cms.EDFilter("PATMuonSelector", src = cms.InputTag("patMuonsPF"),
+  cut = cms.string('isTrackerMuon && isGlobalMuon && globalTrack.normalizedChi2 < 10. && innerTrack.numberOfValidHits > 10 && globalTrack.hitPattern.numberOfValidMuonHits > 0 && abs(eta) < 2.4 && pt > 20. && abs(dB) < 0.02 && (neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20') )
+process.mySelectedPatMuons2p1 =cms.EDFilter("PATMuonSelector", src = cms.InputTag("mySelectedPatMuons"), cut = cms.string('abs(eta) < 2.1' )  )
+pPF += process.mySelectedPatMuons; pPF += process.mySelectedPatMuons2p1 
+myElectronCutBasedId_cfi = imp.load_source('module.name', os.getenv('CMSSW_BASE')+'/DiLeptonicSelection/myElectronCutBasedId_cfi.py')
+process.simpleEleId90cIso = myElectronCutBasedId_cfi.simpleEleId90cIso
+process.pfIsolatedElectronsPF.isolationCut = 99
+process.pfPileUpIsoPF.Vertices = cms.InputTag("goodOfflinePrimaryVertices")
+process.elPFIsoValueGamma03PFIdPF.deposits[0].vetos = cms.vstring('Threshold(0.5)')
+process.elPFIsoValueNeutral03PFIdPF.deposits[0].vetos = cms.vstring('Threshold(0.5)')
+pPF.replace(process.patElectronsPF,process.simpleEleId90cIso * process.patElectronsPF) #pPF += process.simpleEleId90cIso
+process.patElectronsPF.electronIDSources.simpleEleId90cIso = cms.InputTag("simpleEleId90cIso")
+process.patElectronsPF.isolationValues = cms.PSet( pfChargedHadrons = cms.InputTag("elPFIsoValueCharged03PFIdPF"),pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral03PFIdPF"),pfPhotons = cms.InputTag("elPFIsoValueGamma03PFIdPF"))
+process.AddAdditionalElecConvInfoProducer = cms.EDProducer("AddAdditionalElecConvInfoProducer",eleSrc = cms.InputTag("patElectronsPF"));pPF +=process.AddAdditionalElecConvInfoProducer
+process.myIntermediateElectrons = cms.EDProducer("PATElectronCleaner", src = cms.InputTag("AddAdditionalElecConvInfoProducer"),
+    preselection = cms.string(''),# preselection (any string-based cut for pat::Muon)
+    checkOverlaps = cms.PSet(# overlap checking configurables
+        muonsTrkOrGl = cms.PSet(
+           src       = cms.InputTag("patMuonsPF"),
+           algorithm = cms.string("byDeltaR"),
+           preselection        = cms.string("isTrackerMuon || isGlobalMuon"),  # don't preselect the muons
+           deltaR              = cms.double(0.1),
+           checkRecoComponents = cms.bool(False), # don't check if they share some AOD object ref
+           pairCut             = cms.string(''),
+           requireNoOverlaps   = cms.bool(False), # overlaps don't cause the electron to be discared
+        )
+    ),
+    finalCut = cms.string(''),# finalCut (any string-based cut for pat::Muon)
+  );pPF += process.myIntermediateElectrons 
+process.mySelectedPatElectrons = cms.EDFilter("PATElectronSelector", src = cms.InputTag("myIntermediateElectrons"),
+      	  cut = cms.string('pt > 20. && abs(eta) < 2.5 && gsfTrack.trackerExpectedHitsInner.numberOfLostHits < 2 && !(abs(userFloat("deltaCotTheta")) < 0.02 && abs(userFloat("deltaDistance")) < 0.02 )  && test_bit(electronID("simpleEleId90cIso"), 0) && (neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.17 && abs(dB) < 0.04 && ecalDrivenSeed && !hasOverlaps("muonsTrkOrGl")')#&& gsfTrack->trackerExpectedHitsInner().numberOfLostHits() < 2 &&test_bit(electronID("simpleEleId90cIso"), 0)')
+)
+pPF += process.mySelectedPatElectrons; pPF += process.cleanPatJetsPF
+process.addBTagWeights = cms.EDProducer("AddMyBTagWeights",jetSrc = cms.InputTag("cleanPatJetsPF")); pPF += process.addBTagWeights
+from PhysicsTools.PatAlgos.tools.pfTools import *
+#adaptPFTaus( process, tauType='hpsPFTau', postfix=postfix )
+debugIt = True
+if debugIt:
+ process.TFileService=cms.Service("TFileService",fileName=cms.string('patRefSel_diLep_cfg_debughistos.root'))
+# DI Muon Signal 
+if executeDiMuonPath:
+  diMuon_cfg.doDiMuonPath(process,pPF,True)
+#DI Electron Signal
+#executeDiElectronPath = True
+if executeDiElectronPath:
+  diElectron_cfg.doDiElectronPath(process,pPF,True)
+  ## my electron selection
+# Di EMu Signal
+if executeDiElectronMuonPath: 
+  diEleMuon_cfg.doDiEleMuonPath(process,pPF,True)
+  ##DiElectronMuon
 
-  ## pPF configuration continues ...
+## pPF configuration continues ...
 #
 if options.outputFile != str('output.root'):
  print "the outputfile ",options.outputFile
