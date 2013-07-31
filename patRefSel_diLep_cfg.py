@@ -38,27 +38,6 @@ print "this is cmsRun input: ",sys.argv
 ### Data or MC?
 runOnMC = True
 
-# PF2PAT
-
-### Switch on/off selection steps
-
-# Step 1b
-useTightMuon    = True
-# Step 2
-useMuonVeto     = True
-# Step 3
-useElectronVeto = True
-# Step 4a
-use1Jet         = True
-# Step 4b
-use2Jets        = False
-# Step 4c
-use3Jets        = False
-# Step 5
-use4Jets        = False
-# Step 6
-useBTag         = False
-
 ### Reference selection
 
 import TopQuarkAnalysis.Configuration.patRefSel_refMuJets as patRefSel_refMuJets 
