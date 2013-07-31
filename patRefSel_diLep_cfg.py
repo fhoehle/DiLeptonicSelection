@@ -31,7 +31,6 @@ def analyzeColl(coll,path,process,prefix=''):
 
 ######################
 process = cms.Process( 'PAT' )
-AddFilters = cfgFileTools.AddFilters
 #######
 #dump cmsRun parameters
 print "this is cmsRun input: ",sys.argv
@@ -62,7 +61,7 @@ useBTag         = False
 
 ### Reference selection
 
-from TopQuarkAnalysis.Configuration.patRefSel_refMuJets import *
+import TopQuarkAnalysis.Configuration.patRefSel_refMuJets as patRefSel_refMuJets 
 postfix = 'PF' # needs to be a non-empty string, if 'runStandardPAT' = True
 
 # subtract charged hadronic pile-up particles (from wrong PVs)
@@ -197,12 +196,12 @@ process.step0c = cms.Sequence(
 pfSuffix = 'PF'
 
 process.load( "PhysicsTools.PatAlgos.patSequences_cff" )
-from PhysicsTools.PatAlgos.tools.coreTools import *
+import PhysicsTools.PatAlgos.tools.coreTools as PhysPatAlgCoreTools
 
 ### Check JECs
 
 # JEC set
-jecSetPF    = jecSetBase + pfSuffix + 'chs' 
+jecSetPF    = patRefSel_refMuJets.jecSetBase + pfSuffix + 'chs' 
 
 # JEC levels
 if useL1FastJet and useL1Offset:
@@ -225,55 +224,53 @@ if useL7Parton:
 
 ### Switch configuration
 
-if runPF2PAT:
-  from PhysicsTools.PatAlgos.tools.pfTools import *
-  usePF2PAT( process
-           , runPF2PAT      = runPF2PAT
-           , runOnMC        = runOnMC
-           , jetAlgo        = jetAlgo
-           , postfix        = postfix
-           , jetCorrections = ( jecSetPF
-                              , jecLevels
-                              )
-           )
-  adaptPFTaus( process, tauType='hpsPFTau', postfix=postfix )
-  applyPostfix( process, 'pfNoPileUp'  , postfix ).enable = usePFnoPU
-  applyPostfix( process, 'pfNoMuon'    , postfix ).enable = useNoMuon
-  applyPostfix( process, 'pfNoElectron', postfix ).enable = useNoElectron
-  applyPostfix( process, 'pfNoJet'     , postfix ).enable = useNoJet
-  applyPostfix( process, 'pfNoTau'     , postfix ).enable = useNoTau
-  applyPostfix( process, 'pfPileUp', postfix ).Vertices = cms.InputTag( pfVertices )
-  if useL1FastJet:
-    applyPostfix( process, 'pfPileUp'   , postfix ).checkClosestZVertex = False
-    applyPostfix( process, 'pfPileUpIso', postfix ).checkClosestZVertex = usePfIsoLessCHS
-    applyPostfix( process, 'pfJets', postfix ).doAreaFastjet = True
-    applyPostfix( process, 'pfJets', postfix ).doRhoFastjet  = False
-  applyPostfix( process, 'pfMuonsFromVertex'    , postfix ).vertices = cms.InputTag( pfVertices )
-  applyPostfix( process, 'pfMuonsFromVertex'    , postfix ).d0Cut    = pfD0Cut
-  applyPostfix( process, 'pfMuonsFromVertex'    , postfix ).dzCut    = pfDzCut
-  applyPostfix( process, 'pfSelectedMuons'      , postfix ).cut = pfMuonSelectionCut
-  applyPostfix( process, 'pfIsolatedMuons'      , postfix ).isolationCut = pfMuonCombIsoCut
-  applyPostfix( process, 'pfElectronsFromVertex'    , postfix ).vertices = cms.InputTag( pfVertices )
-  applyPostfix( process, 'pfElectronsFromVertex'    , postfix ).d0Cut    = pfD0Cut
-  applyPostfix( process, 'pfElectronsFromVertex'    , postfix ).dzCut    = pfDzCut
-  applyPostfix( process, 'pfSelectedElectrons'      , postfix ).cut = pfElectronSelectionCut
-  applyPostfix( process, 'pfIsolatedElectrons'      , postfix ).isolationCut = pfElectronCombIsoCut
-  applyPostfix( process, 'patElectrons', postfix ).pvSrc = cms.InputTag( pfVertices )
-  applyPostfix( process, 'patMuons'    , postfix ).pvSrc = cms.InputTag( pfVertices )
+import PhysicsTools.PatAlgos.tools.pfTools as pfTools
+pfTools.usePF2PAT( process
+         , runPF2PAT      = True #runPF2PAT
+         , runOnMC        = runOnMC
+         , jetAlgo        = patRefSel_refMuJets.jetAlgo
+         , postfix        = postfix
+         , jetCorrections = ( jecSetPF
+                            , jecLevels
+                            )
+         )
+pfTools.adaptPFTaus( process, tauType='hpsPFTau', postfix=postfix )
+pfTools.applyPostfix( process, 'pfNoPileUp'  , postfix ).enable = usePFnoPU
+pfTools.applyPostfix( process, 'pfNoMuon'    , postfix ).enable = useNoMuon
+pfTools.applyPostfix( process, 'pfNoElectron', postfix ).enable = useNoElectron
+pfTools.applyPostfix( process, 'pfNoJet'     , postfix ).enable = useNoJet
+pfTools.applyPostfix( process, 'pfNoTau'     , postfix ).enable = useNoTau
+pfTools.applyPostfix( process, 'pfPileUp', postfix ).Vertices = cms.InputTag( patRefSel_refMuJets.pfVertices )
+if useL1FastJet:
+  pfTools.applyPostfix( process, 'pfPileUp'   , postfix ).checkClosestZVertex = False
+  pfTools.applyPostfix( process, 'pfPileUpIso', postfix ).checkClosestZVertex = usePfIsoLessCHS
+  pfTools.applyPostfix( process, 'pfJets', postfix ).doAreaFastjet = True
+  pfTools.applyPostfix( process, 'pfJets', postfix ).doRhoFastjet  = False
+pfTools.applyPostfix( process, 'pfMuonsFromVertex'    , postfix ).vertices = cms.InputTag( patRefSel_refMuJets.pfVertices )
+pfTools.applyPostfix( process, 'pfMuonsFromVertex'    , postfix ).d0Cut    = patRefSel_refMuJets.pfD0Cut
+pfTools.applyPostfix( process, 'pfMuonsFromVertex'    , postfix ).dzCut    = patRefSel_refMuJets.pfDzCut
+pfTools.applyPostfix( process, 'pfSelectedMuons'      , postfix ).cut = patRefSel_refMuJets.pfMuonSelectionCut
+pfTools.applyPostfix( process, 'pfIsolatedMuons'      , postfix ).isolationCut = patRefSel_refMuJets.pfMuonCombIsoCut
+pfTools.applyPostfix( process, 'pfElectronsFromVertex'    , postfix ).vertices = cms.InputTag( patRefSel_refMuJets.pfVertices )
+pfTools.applyPostfix( process, 'pfElectronsFromVertex'    , postfix ).d0Cut    = patRefSel_refMuJets.pfD0Cut
+pfTools.applyPostfix( process, 'pfElectronsFromVertex'    , postfix ).dzCut    = patRefSel_refMuJets.pfDzCut
+pfTools.applyPostfix( process, 'pfSelectedElectrons'      , postfix ).cut = patRefSel_refMuJets.pfElectronSelectionCut
+pfTools.applyPostfix( process, 'pfIsolatedElectrons'      , postfix ).isolationCut = patRefSel_refMuJets.pfElectronCombIsoCut
+pfTools.applyPostfix( process, 'patElectrons', postfix ).pvSrc = cms.InputTag( patRefSel_refMuJets.pfVertices )
+pfTools.applyPostfix( process, 'patMuons'    , postfix ).pvSrc = cms.InputTag( patRefSel_refMuJets.pfVertices )
 
-from TopQuarkAnalysis.Configuration.patRefSel_refMuJets_cfi import *
+import TopQuarkAnalysis.Configuration.patRefSel_refMuJets_cfi as patRefSel_refMuJets_cfi
 
 # remove MC matching, object cleaning, objects etc.
-if runPF2PAT:
-  if not runOnMC:
-    runOnData( process
-             , names = [ 'PFAll' ]
-             , postfix = postfix
-             )
-  removeSpecificPATObjects( process
-                          , names = [ 'Photons', 'Taus' ]
-                          , postfix = postfix
-                          ) # includes 'removeCleaning'
+if not runOnMC:
+  runOnData( process
+           , names = [ 'PFAll' ]
+           , postfix = postfix
+           )
+PhysPatAlgCoreTools.removeSpecificPATObjects( process
+                        , names = [ 'Photons', 'Taus' ]
+                        , postfix = postfix
+                        ) # includes 'removeCleaning'
 # additional event content has to be (re-)added _after_ the call to 'removeCleaning()':
 process.out.outputCommands += [ 'keep edmTriggerResults_*_*_*'
                               , 'keep *_hltTriggerSummaryAOD_*_*'
@@ -293,60 +290,58 @@ if runOnMC:
 ### Additional configuration
 ###
 
-goodPatJetsAddPFLabel = 'goodPatJets' + jetAlgo + pfSuffix
+goodPatJetsAddPFLabel = 'goodPatJets' + patRefSel_refMuJets.jetAlgo + pfSuffix
 
 
-if runPF2PAT:
+### Muons
 
-  ### Muons
+intermediatePatMuonsPF = patRefSel_refMuJets_cfi.intermediatePatMuons.clone( src = cms.InputTag( 'selectedPatMuons' + postfix ) )
+setattr( process, 'intermediatePatMuons' + postfix, intermediatePatMuonsPF )
 
-  intermediatePatMuonsPF = intermediatePatMuons.clone( src = cms.InputTag( 'selectedPatMuons' + postfix ) )
-  setattr( process, 'intermediatePatMuons' + postfix, intermediatePatMuonsPF )
+loosePatMuonsPF = patRefSel_refMuJets_cfi.loosePatMuons.clone( src = cms.InputTag( 'intermediatePatMuons' + postfix ) )
+setattr( process, 'loosePatMuons' + postfix, loosePatMuonsPF )
+getattr( process, 'loosePatMuons' + postfix ).checkOverlaps.jets.src = cms.InputTag( 'goodPatJets' + postfix )
 
-  loosePatMuonsPF = loosePatMuons.clone( src = cms.InputTag( 'intermediatePatMuons' + postfix ) )
-  setattr( process, 'loosePatMuons' + postfix, loosePatMuonsPF )
-  getattr( process, 'loosePatMuons' + postfix ).checkOverlaps.jets.src = cms.InputTag( 'goodPatJets' + postfix )
+step1aPF = patRefSel_refMuJets_cfi.step1a.clone( src = cms.InputTag( 'loosePatMuons' + postfix ) )
+setattr( process, 'step1a' + postfix, step1aPF )
 
-  step1aPF = step1a.clone( src = cms.InputTag( 'loosePatMuons' + postfix ) )
-  setattr( process, 'step1a' + postfix, step1aPF )
+tightPatMuonsPF = patRefSel_refMuJets_cfi.tightPatMuons.clone( src = cms.InputTag( 'loosePatMuons' + postfix ) )
+setattr( process, 'tightPatMuons' + postfix, tightPatMuonsPF )
 
-  tightPatMuonsPF = tightPatMuons.clone( src = cms.InputTag( 'loosePatMuons' + postfix ) )
-  setattr( process, 'tightPatMuons' + postfix, tightPatMuonsPF )
+step1bPF = patRefSel_refMuJets_cfi.step1b.clone( src = cms.InputTag( 'tightPatMuons' + postfix ) )
+setattr( process, 'step1b' + postfix, step1bPF )
 
-  step1bPF = step1b.clone( src = cms.InputTag( 'tightPatMuons' + postfix ) )
-  setattr( process, 'step1b' + postfix, step1bPF )
+step2PF = patRefSel_refMuJets_cfi.step2.clone( src = cms.InputTag( 'selectedPatMuons' + postfix ) )
+setattr( process, 'step2' + postfix, step2PF )
 
-  step2PF = step2.clone( src = cms.InputTag( 'selectedPatMuons' + postfix ) )
-  setattr( process, 'step2' + postfix, step2PF )
+### Jets
 
-  ### Jets
+pfTools.applyPostfix( process, 'patJetCorrFactors', postfix ).primaryVertices = cms.InputTag( patRefSel_refMuJets.pfVertices )
+setattr( process, 'kt6PFJets' + postfix, patRefSel_refMuJets_cfi.kt6PFJets )
+getattr( process, 'patPF2PATSequence' + postfix).replace( getattr( process, 'patJetCorrFactors' + postfix )
+                                                        , getattr( process, 'kt6PFJets' + postfix ) * getattr( process, 'patJetCorrFactors' + postfix )
+                                                        )
+if useL1FastJet:
+  pfTools.applyPostfix( process, 'patJetCorrFactors', postfix ).rho = cms.InputTag( 'kt6PFJets' + postfix, 'rho' )
+process.out.outputCommands.append( 'keep double_kt6PFJets' + postfix + '_*_' + process.name_() )
 
-  applyPostfix( process, 'patJetCorrFactors', postfix ).primaryVertices = cms.InputTag( pfVertices )
-  setattr( process, 'kt6PFJets' + postfix, kt6PFJets )
-  getattr( process, 'patPF2PATSequence' + postfix).replace( getattr( process, 'patJetCorrFactors' + postfix )
-                                                          , getattr( process, 'kt6PFJets' + postfix ) * getattr( process, 'patJetCorrFactors' + postfix )
-                                                          )
-  if useL1FastJet:
-    applyPostfix( process, 'patJetCorrFactors', postfix ).rho = cms.InputTag( 'kt6PFJets' + postfix, 'rho' )
-  process.out.outputCommands.append( 'keep double_kt6PFJets' + postfix + '_*_' + process.name_() )
+goodPatJetsPF = patRefSel_refMuJets_cfi.goodPatJets.clone( src = cms.InputTag( 'selectedPatJets' + postfix ) )
+setattr( process, 'goodPatJets' + postfix, goodPatJetsPF )
+getattr( process, 'goodPatJets' + postfix ).checkOverlaps.muons.src = cms.InputTag( 'intermediatePatMuons' + postfix )
 
-  goodPatJetsPF = goodPatJets.clone( src = cms.InputTag( 'selectedPatJets' + postfix ) )
-  setattr( process, 'goodPatJets' + postfix, goodPatJetsPF )
-  getattr( process, 'goodPatJets' + postfix ).checkOverlaps.muons.src = cms.InputTag( 'intermediatePatMuons' + postfix )
+step4aPF = patRefSel_refMuJets_cfi.step4a.clone( src = cms.InputTag( 'goodPatJets' + postfix ) )
+setattr( process, 'step4a' + postfix, step4aPF )
+step4bPF = patRefSel_refMuJets_cfi.step4b.clone( src = cms.InputTag( 'goodPatJets' + postfix ) )
+setattr( process, 'step4b' + postfix, step4bPF )
+step4cPF = patRefSel_refMuJets_cfi.step4c.clone( src = cms.InputTag( 'goodPatJets' + postfix ) )
+setattr( process, 'step4c' + postfix, step4cPF )
+step5PF = patRefSel_refMuJets_cfi.step5.clone( src = cms.InputTag( 'goodPatJets' + postfix ) )
+setattr( process, 'step5'  + postfix, step5PF  )
 
-  step4aPF = step4a.clone( src = cms.InputTag( 'goodPatJets' + postfix ) )
-  setattr( process, 'step4a' + postfix, step4aPF )
-  step4bPF = step4b.clone( src = cms.InputTag( 'goodPatJets' + postfix ) )
-  setattr( process, 'step4b' + postfix, step4bPF )
-  step4cPF = step4c.clone( src = cms.InputTag( 'goodPatJets' + postfix ) )
-  setattr( process, 'step4c' + postfix, step4cPF )
-  step5PF = step5.clone( src = cms.InputTag( 'goodPatJets' + postfix ) )
-  setattr( process, 'step5'  + postfix, step5PF  )
+### Electrons
 
-  ### Electrons
-
-  step3PF = step3.clone( src = cms.InputTag( 'selectedPatElectrons' + postfix ) )
-  setattr( process, 'step3' + postfix, step3PF )
+step3PF = patRefSel_refMuJets_cfi.step3.clone( src = cms.InputTag( 'selectedPatElectrons' + postfix ) )
+setattr( process, 'step3' + postfix, step3PF )
 
 process.out.outputCommands.append( 'keep *_intermediatePatMuons*_*_*' )
 process.out.outputCommands.append( 'keep *_loosePatMuons*_*_*' )
@@ -358,30 +353,29 @@ process.out.outputCommands.append( 'keep *_goodPatJets*_*_*' )
 ### Selection configuration
 ###
 
-if runPF2PAT:
 
-  applyPostfix( process, 'patMuons', postfix ).usePV      = muonsUsePV
-  applyPostfix( process, 'patMuons', postfix ).embedTrack = muonEmbedTrack
+pfTools.applyPostfix( process, 'patMuons', postfix ).usePV      = patRefSel_refMuJets.muonsUsePV
+pfTools.applyPostfix( process, 'patMuons', postfix ).embedTrack = patRefSel_refMuJets.muonEmbedTrack
 
-  applyPostfix( process, 'selectedPatMuons', postfix ).cut = muonCutPF
+pfTools.applyPostfix( process, 'selectedPatMuons', postfix ).cut = patRefSel_refMuJets.muonCutPF
 
-  getattr( process, 'intermediatePatMuons' + postfix ).preselection = looseMuonCutPF
+getattr( process, 'intermediatePatMuons' + postfix ).preselection = patRefSel_refMuJets.looseMuonCutPF
 
-  getattr( process, 'loosePatMuons' + postfix ).preselection              = looseMuonCutPF
-  getattr( process, 'loosePatMuons' + postfix ).checkOverlaps.jets.deltaR = muonJetsDR
+getattr( process, 'loosePatMuons' + postfix ).preselection              = patRefSel_refMuJets.looseMuonCutPF
+getattr( process, 'loosePatMuons' + postfix ).checkOverlaps.jets.deltaR = patRefSel_refMuJets.muonJetsDR
 
-  getattr( process, 'tightPatMuons' + postfix ).preselection = tightMuonCutPF
+getattr( process, 'tightPatMuons' + postfix ).preselection = patRefSel_refMuJets.tightMuonCutPF
 
-  ### Jets
+### Jets
 
-  getattr( process, 'goodPatJets' + postfix ).preselection               = jetCutPF
-  getattr( process, 'goodPatJets' + postfix ).checkOverlaps.muons.deltaR = jetMuonsDRPF
+getattr( process, 'goodPatJets' + postfix ).preselection               = patRefSel_refMuJets.jetCutPF
+getattr( process, 'goodPatJets' + postfix ).checkOverlaps.muons.deltaR = patRefSel_refMuJets.jetMuonsDRPF
 
-  ### Electrons
+### Electrons
 
-  applyPostfix( process, 'patElectrons', postfix ).electronIDSources = electronIDSources
+pfTools.applyPostfix( process, 'patElectrons', postfix ).electronIDSources = patRefSel_refMuJets_cfi.electronIDSources
 
-  applyPostfix( process, 'selectedPatElectrons', postfix ).cut = electronCutPF
+pfTools.applyPostfix( process, 'selectedPatElectrons', postfix ).cut = patRefSel_refMuJets.electronCutPF
 
 
 ###
@@ -390,24 +384,24 @@ if runPF2PAT:
 
 
 if runOnMC:
-  triggerObjectSelection = triggerObjectSelectionMC
+  triggerObjectSelection = patRefSel_refMuJets.triggerObjectSelectionMC
 else:
-  triggerObjectSelection = triggerObjectSelectionData
+  triggerObjectSelection = patRefSel_refMuJets.triggerObjectSelectionData
 ### Trigger matching configuration
 from PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cfi import patTrigger
 from TopQuarkAnalysis.Configuration.patRefSel_triggerMatching_cfi import patMuonTriggerMatch
-from PhysicsTools.PatAlgos.tools.trigTools import *
+import PhysicsTools.PatAlgos.tools.trigTools as trigTools
 triggerProducerPF = patTrigger.clone()
 setattr( process, 'patTrigger' + postfix, triggerProducerPF )
 triggerMatchPF = patMuonTriggerMatch.clone( matchedCuts = triggerObjectSelection )
 setattr( process, 'triggerMatch' + postfix, triggerMatchPF )
-switchOnTriggerMatchEmbedding( process
+trigTools.switchOnTriggerMatchEmbedding( process
                              , triggerProducer = 'patTrigger' + postfix
                              , triggerMatchers = [ 'triggerMatch' + postfix ]
                              , sequence        = 'patPF2PATSequence' + postfix
                              , postfix         = postfix
                              )
-removeCleaningFromTriggerMatching( process
+trigTools.removeCleaningFromTriggerMatching( process
                                  , sequence = 'patPF2PATSequence' + postfix
                                  )
 getattr( process, 'intermediatePatMuons' + postfix ).src = cms.InputTag( 'selectedPatMuons' + postfix + 'TriggerMatch' )
@@ -433,20 +427,20 @@ process.eidCiCSequence = cms.Sequence(
 )
 
 # The additional sequence
-patAddOnSequence = cms.Sequence(
-  getattr( process, 'intermediatePatMuons' + postfix )
-* getattr( process, 'goodPatJets' + postfix )
-* getattr( process, 'loosePatMuons' + postfix )
-* getattr( process, 'tightPatMuons' + postfix )
-)
-setattr( process, 'patAddOnSequence' + postfix, patAddOnSequence )
+#patAddOnSequence = cms.Sequence(
+#  getattr( process, 'intermediatePatMuons' + postfix )
+#* getattr( process, 'goodPatJets' + postfix )
+#* getattr( process, 'loosePatMuons' + postfix )
+#* getattr( process, 'tightPatMuons' + postfix )
+#)
+#setattr( process, 'patAddOnSequence' + postfix, patAddOnSequence )
 
 # The paths
 pPF = cms.Path()
 pPF += process.goodOfflinePrimaryVertices
 pPF += process.eidCiCSequence
 pPF += getattr( process, 'patPF2PATSequence' + postfix )
-pPF += getattr( process, 'patAddOnSequence' + postfix )
+#pPF += getattr( process, 'patAddOnSequence' + postfix )
 process.mySelectedPatMET = cms.EDFilter("PATMETSelector", src = cms.InputTag('patMETs'+postfix), cut = cms.string("pt > 30") );  pPF += process.mySelectedPatMET
 process.pfNoMuonPF.enable = False
 process.pfNoElectronPF.enable = False
@@ -511,8 +505,7 @@ process.mySelectedPatElectrons = cms.EDFilter("PATElectronSelector", src = cms.I
 )
 pPF += process.mySelectedPatElectrons; pPF += process.cleanPatJetsPF
 process.addBTagWeights = cms.EDProducer("AddMyBTagWeights",jetSrc = cms.InputTag("cleanPatJetsPF")); pPF += process.addBTagWeights
-from PhysicsTools.PatAlgos.tools.pfTools import *
-#adaptPFTaus( process, tauType='hpsPFTau', postfix=postfix )
+#
 debugIt = True
 if debugIt:
  process.TFileService=cms.Service("TFileService",fileName=cms.string('patRefSel_diLep_cfg_debughistos.root'))
