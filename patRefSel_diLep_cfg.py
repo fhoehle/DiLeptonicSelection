@@ -24,6 +24,7 @@ options.register ('eventsToProcess',
                    VarParsing.varType.string,
                    "Events to process")
 options.register('runOnTTbar',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'runOnTTbar')
+options.register('N1TTbarDiLepBck',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'N1TTbarDiLepBck')
 options.parseArguments()
 import FWCore.ParameterSet.Config as cms
 def analyzeColl(coll,path,process,prefix=''):
@@ -558,6 +559,8 @@ process.MessageLogger.myDebugFile = cms.untracked.PSet(threshold = cms.untracked
 #process.addMyBTagWeights = cms.EDProducer("AddMyBTagWeights"); process.simpleProd += process.addMyBTagWeights
 process.out.SelectEvents.SelectEvents.append( 'simpleProd' )
 # Compute the mean pt per unit area (rho) from the
+if options.N1TTbarDiLepBck:
+  options.runOnTTbar = True
 if options.runOnTTbar:
   print "attention using genMC ttbar di lep cut"
   process.myttbarGenEvent10Parts = cms.EDProducer('MyTTbarGenEvent10Parts')
@@ -567,3 +570,8 @@ if options.runOnTTbar:
   #if options.filterSignal:
   print "tagging di lep signal"
   process.isDiLepPath = cms.Path(process.myttbarGenEvent10Parts*process.diLepMcFilter)
+  if doMuonN1:
+   if options.N1TTbarDiLepBck:
+     process.pPFN1.replace(process.myttbarGenEvent10Parts,process.myttbarGenEvent10Parts*~process.diLepMcFilter)
+   else:
+     process.pPFN1.replace(process.myttbarGenEvent10Parts,process.myttbarGenEvent10Parts*process.diLepMcFilter)
