@@ -3,6 +3,9 @@
 # as defined in
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopLeptonPlusJetsRefSel_mu#Selection_Version_SelV4_valid_fr
 #
+def createCut(cuts):
+  return ''.join([c['cut'] if i == 0 else " && "+c['cut'] for i,c in enumerate(cuts) ])
+
 import imp,os
 executeDiElectronPath = False
 diMuon_cfg = imp.load_source('module.name', os.getenv('CMSSW_BASE')+'/DiLeptonicSelection/diMuon_cfg.py')
@@ -449,11 +452,7 @@ process.cleanPatJetsPF.checkOverlaps = cms.PSet(    muons = cms.PSet(src = cms.I
       preselection = cms.string(''),
       requireNoOverlaps = cms.bool(True)
   ))
-
-process.mySelectedPatMuons = cms.EDFilter("PATMuonSelector", src = cms.InputTag("patMuonsPF"),
-  cut = cms.string('isTrackerMuon && isGlobalMuon && globalTrack.normalizedChi2 < 10. && innerTrack.numberOfValidHits > 10 && globalTrack.hitPattern.numberOfValidMuonHits > 0 && abs(eta) < 2.4 && pt > 20. && abs(dB) < 0.02 && (neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20') )
-process.mySelectedPatMuons2p1 =cms.EDFilter("PATMuonSelector", src = cms.InputTag("mySelectedPatMuons"), cut = cms.string('abs(eta) < 2.1' )  )
-pPF += process.mySelectedPatMuons; pPF += process.mySelectedPatMuons2p1 
+## adding collections
 myElectronCutBasedId_cfi = imp.load_source('module.name', os.getenv('CMSSW_BASE')+'/DiLeptonicSelection/myElectronCutBasedId_cfi.py')
 process.simpleEleId90cIso = myElectronCutBasedId_cfi.simpleEleId90cIso
 process.pfIsolatedElectronsPF.isolationCut = 99
@@ -464,6 +463,45 @@ pPF.replace(process.patElectronsPF,process.simpleEleId90cIso * process.patElectr
 process.patElectronsPF.electronIDSources.simpleEleId90cIso = cms.InputTag("simpleEleId90cIso")
 process.patElectronsPF.isolationValues = cms.PSet( pfChargedHadrons = cms.InputTag("elPFIsoValueCharged03PFIdPF"),pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral03PFIdPF"),pfPhotons = cms.InputTag("elPFIsoValueGamma03PFIdPF"))
 process.AddAdditionalElecConvInfoProducer = cms.EDProducer("AddAdditionalElecConvInfoProducer",eleSrc = cms.InputTag("patElectronsPF"));pPF +=process.AddAdditionalElecConvInfoProducer
+## object definition
+boolHist = cms.PSet( min = cms.untracked.double(-0.5), max = cms.untracked.double(2.5), nbins = cms.untracked.int32(3))
+chi2Hist = cms.PSet( min = cms.untracked.double(-0.5), max = cms.untracked.double(100.5), nbins = cms.untracked.int32(202))
+etaHist = cms.PSet( min = cms.untracked.double(-5), max = cms.untracked.double(5), nbins = cms.untracked.int32(200))
+ptHist = cms.PSet( min = cms.untracked.double(0), max = cms.untracked.double(200), nbins = cms.untracked.int32(200))
+relIsoHist = cms.PSet( min = cms.untracked.double(0), max = cms.untracked.double(2), nbins = cms.untracked.int32(1000))
+dbHist = cms.PSet( min = cms.untracked.double(0), max = cms.untracked.double(1), nbins = cms.untracked.int32(200))
+#, name = cms.untracked.string('JetPt'), description  = cms.untracked.string(''), plotquantity = cms.untracked.string(   'pt'))
+#muons
+myMuonCuts = {"cuts":[{'label':'isTrackerMuon','cut':'isTrackerMuon',"hist":boolHist},{'label':'isGlobalMuon','cut':'isGlobalMuon',"hist":boolHist,"not":['globalTrackHitPatValHits','globalTrackNormalizedChi2','globalTrackHitPatValHits']},{'label':'globalTrackNormalizedChi2','cut':'globalTrack.normalizedChi2 < 10.','hist':chi2Hist},{'label':'innerTrackValHits','cut':'innerTrack.numberOfValidHits > 10','hist':chi2Hist},{'label':'globalTrackHitPatValHits','cut':'globalTrack.hitPattern.numberOfValidMuonHits > 0','hist':chi2Hist},{'label':'absEta','cut':'abs(eta) < 2.4','hist':etaHist},{'label':'pt','cut':'pt > 20.','hist':ptHist},{'label':'dB','cut':'abs(dB) < 0.02','hist':dbHist},{'label':'relIso','cut':'(neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20','hist':relIsoHist}],"coll":"patMuonsPF"}
+finalCut=createCut(myMuonCuts["cuts"])
+doMuonN1 = True #False
+import copy,re
+if doMuonN1:
+  process.pPFN1 = cms.Path(pPF._seq)
+  cutsList =  myMuonCuts["cuts"]
+  for i,cut in enumerate(cutsList):
+    print "contructiong for ",cut,"  ",i
+    tmpCutList = cutsList[:i]+cutsList[i+1:]
+    if cut.has_key("not"):
+      tmpCutList = [c for c in cutsList[:i]+cutsList[i+1:] if not c["label"] in cut["not"]] 
+    tmpCutList=createCut(tmpCutList)
+    print tmpCutList
+    tmpMuonN1Coll = cms.EDFilter("PATMuonSelector", src = cms.InputTag(myMuonCuts["coll"]),cut = cms.string(tmpCutList)  )
+    tmpMuonN1CollName = tmpMuonN1Coll.src.value() +'NM1'+cut["label"]
+    setattr(process,tmpMuonN1CollName,tmpMuonN1Coll); process.pPFN1 += getattr(process,tmpMuonN1CollName)
+    reCut = re.match('^\ *([^<>=]*)\ *[<>=]*[=]*\ *[^<>=]*$',cut["cut"]).group(1)
+    print reCut
+    tmpHist = copy.deepcopy(cut["hist"]);setattr(tmpHist,'name',cms.untracked.string(cut["label"]));setattr(tmpHist,'description',cms.untracked.string(cut["label"]));setattr(tmpHist,'plotquantity',cms.untracked.string(reCut));tmpHist.lazyParsing = cms.untracked.bool(True)
+    tmpMuonN1Histo = cms.EDAnalyzer('CandViewHistoAnalyzer', src = cms.InputTag(tmpMuonN1CollName),histograms = cms.VPSet(tmpHist))
+    setattr(process, tmpMuonN1CollName+"N1Histo" ,tmpMuonN1Histo); process.pPFN1 += getattr(process,tmpMuonN1CollName+"N1Histo")
+    
+process.mySelectedPatMuons = cms.EDFilter("PATMuonSelector", src = cms.InputTag("patMuonsPF"),
+  #cut = cms.string('isTrackerMuon && isGlobalMuon && globalTrack.normalizedChi2 < 10. && innerTrack.numberOfValidHits > 10 && globalTrack.hitPattern.numberOfValidMuonHits > 0 && abs(eta) < 2.4 && pt > 20. && abs(dB) < 0.02 && (neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20') 
+   cut = cms.string(finalCut)
+  )
+process.mySelectedPatMuons2p1 =cms.EDFilter("PATMuonSelector", src = cms.InputTag("mySelectedPatMuons"), cut = cms.string('abs(eta) < 2.1' )  )
+pPF += process.mySelectedPatMuons; pPF += process.mySelectedPatMuons2p1 
+
 process.myIntermediateElectrons = cms.EDProducer("PATElectronCleaner", src = cms.InputTag("AddAdditionalElecConvInfoProducer"),
     preselection = cms.string(''),# preselection (any string-based cut for pat::Muon)
     checkOverlaps = cms.PSet(# overlap checking configurables
