@@ -566,7 +566,7 @@ if options.runOnTTbar:
   process.myttbarGenEvent10Parts = cms.EDProducer('MyTTbarGenEvent10Parts')
   for pName in process.paths.keys():
     getattr(process,pName).insert(0,process.myttbarGenEvent10Parts)
-  process.diLepMcFilter = cms.EDFilter('DiLepMcFilter', ttbarEventTag = cms.untracked.InputTag("myTTbarGenEvent10Parts")    )
+  process.diLepMcFilter = cms.EDFilter('DiLepMcFilter', ttbarEventTag = cms.untracked.InputTag("myttbarGenEvent10Parts")    )
   #if options.filterSignal:
   print "tagging di lep signal"
   process.isDiLepPath = cms.Path(process.myttbarGenEvent10Parts*process.diLepMcFilter)
