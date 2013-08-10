@@ -1,0 +1,38 @@
+import ROOT,sys,os
+sys.path.append(os.getenv('HOME')+'/PyRoot_Helpers/PyRoot_Functions')
+import MyHistFunctions_cfi as MyHistFunctions
+def subSlash(st):
+  import re
+  return re.sub('/','_',st)
+datasets = {}
+# signal
+datasets["signal"] = {'label':"TTbarDiLep","xSec":157,"processedEvents":14792.,"color":ROOT.kGreen,"file":"/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TTbarDiLep_2013-08-01_13-27-04/patRefSel_diLep_cfg_debughistos_TT_TuneZ2_7TeV-mcatnlo__Fall11-PU_S6_START42_V14B-v1__AODSIM.root" }
+# ttbar bck
+datasets["ttbarBck"] = {'label':"TTbarNonDiLep","xSec":157,"processedEvents":14810.,"color":ROOT.kRed , "file":"/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TTbarDiLepBck_2013-08-01_13-26-30/patRefSel_diLep_cfg_debughistos_TT_TuneZ2_7TeV-mcatnlo__Fall11-PU_S6_START42_V14B-v1__AODSIM.root"}
+
+plots = ["patMuonsPFNM1isTrackerMuonN1Histo/isTrackerMuon",
+"patMuonsPFNM1isGlobalMuonN1Histo/isGlobalMuon",
+"patMuonsPFNM1globalTrackNormalizedChi2N1Histo/globalTrackNormalizedChi2",
+"patMuonsPFNM1innerTrackValHitsN1Histo/innerTrackValHits",
+"patMuonsPFNM1globalTrackHitPatValHitsN1Histo/globalTrackHitPatValHits",
+"patMuonsPFNM1absEtaN1Histo/absEta",
+"patMuonsPFNM1ptN1Histo/pt",
+"patMuonsPFNM1dBN1Histo/dB",
+"patMuonsPFNM1relIsoN1Histo/relIso"]
+Lint = 100.
+histMans = []
+stacksHists = []
+ROOT.TH1.AddDirectory(False)
+for plot in plots:
+  histMan = MyHistFunctions.MyHistManager("hists_"+plot)
+  tmpCan = ROOT.TCanvas("c_"+plot,plot,200,10,700,400);tmpCan.cd()
+  for key,dataset in datasets.iteritems():
+    tmpHist = (ROOT.TFile(dataset["file"]).Get(plot)).Clone("hist_"+key+"_"+plot)  
+    tmpHist.Sumw2(); MyHistFunctions.addOverFlowToLastBin(tmpHist);tmpHist.SetLineColor(dataset["color"])
+    tmpHist.Scale(Lint/(dataset["processedEvents"]/dataset["xSec"]));
+    histMan.saveHist(tmpHist)
+  stackHists = MyHistFunctions.stackHists(histMan.hists)
+  histMans.append(histMan)
+  stacksHists.append(stackHists)
+  stackHists.createStack();stackHists.plotStack(False,"HIST")
+  tmpCan.SaveAs(subSlash(tmpCan.GetName())+".pdf");tmpCan.SaveAs(subSlash(tmpCan.GetName())+".root")
