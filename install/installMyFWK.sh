@@ -59,31 +59,22 @@ addpkg PhysicsTools/UtilAlgos                           V08-02-14
 addpkg CommonTools/ParticleFlow                         B4_2_X_V00-03-05
 addpkg PhysicsTools/Utilities                           V08-03-17
 #####
-getGitPackage "CMSSW_MyAnalyzers"
-git checkout V00-01 
-cd $CMSSW_BASE/src
-###
-getGitPackage "CMSSW_MyProducers"
-git checkout V00-03
-cd $CMSSW_BASE/src
-###
-getGitPackage "CMSSW_MyDataFormats"
-git checkout V00-01
-cd $CMSSW_BASE/src
-##########
-git clone git@github.com:fhoehle/CMSSW_MyDataFormats.git
-cd CMSSW_MyDataFormats
-git checkout V00-01
-cd $CMSSW_BASE/src
-
-git clone git@github.com:fhoehle/CMSSW_MyFilters.git
-cd CMSSW_MyFilters
-git checkout V00-01
-cd $CMSSW_BASE/src
-
-git clone git@github.com:fhoehle/CMSSW_MyProducers.git
-cd CMSSW_MyProducers
-git checkout V00-01
-cd $CMSSW_BASE/src
+pkgs=(
+  "CMSSW_MyAnalyzers src/ V00-01"
+  "CMSSW_MyProducers src/ V00-03"
+  "CMSSW_MyDataFormats src/ V00-01"
+  "CMSSW_MyFilters src/  V00-01"
+)
+# install my packages
+for idx in ${!pkgs[*]}; do
+  cd $CMSSW_BASE/`echo ${pkgs[$idx]} | awk '{print $2}'`
+  getGitPackage `echo ${pkgs[$idx]} | awk '{print $1}'`
+  git checkout `echo ${pkgs[$idx]} | awk '{print $3}'`
+  if  [ "X`echo ${pkgs[$idx]} | awk '{print $4}'`" != "X" ]; then
+    echo "calling additional command "`echo ${pkgs[$idx]} | awk '{print $4}'`
+    eval `echo ${pkgs[$idx]} | awk '{print $4}'`
+  fi
+  cd $CMSSW_BASE
+done
 
 scram b -j 5
