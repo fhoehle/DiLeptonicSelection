@@ -64,7 +64,7 @@ git checkout V00-01
 cd $CMSSW_BASE/src
 ###
 getGitPackage "CMSSW_MyProducers"
-git checkout V00-02
+git checkout V00-03
 cd $CMSSW_BASE/src
 ###
 getGitPackage "CMSSW_MyDataFormats"
