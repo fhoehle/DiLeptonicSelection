@@ -22,15 +22,9 @@ for i,(key,data) in enumerate(nonTTbarBcks.iteritems()):
   for outF in possOutputFiles:
     if 'patRefSel_diLep_cfg_debughistos' in outF:
       datasets[key]["file"] = os.path.dirname(nonTTbarBckFile.name)+os.path.sep+outF
-  datasets[key]["color"]=ROOT.kBlue-i
+  datasets[key]["color"]=data["sample"]["color"]
   datasets[key]["xSec"]=data["sample"]["xSec"]
   datasets[key]["label"]=data["sample"]["label"]
-##
-datasets["tbarScaleDowntWChDS"] = {'label':"Tbar_scaledown_tW-channel-DS","xSec":1,"processedEvents":9512.,"color":ROOT.kYellow , "file":"/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TTbarDiLepBck_2013-08-10_15-48-14/patRefSel_diLep_cfg_debughistos_Tbar_TuneZ2_scaledown_tW-channel-DS_7TeV-powheg-tauola__Fall11-PU_S6_START42_V14B-v1__AODSIM.root"}
-#
-datasets["tbartWChDS"] = {'label':"Tbar_TuneZ2_tW-channel-DS","xSec":1,"processedEvents":1,"color":ROOT.kYellow+3 , "file":"/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TTbarDiLepBck_2013-08-10_15-48-14/patRefSel_diLep_cfg_debughistos_Tbar_TuneZ2_tW-channel-DS_7TeV-powheg-tauola__Fall11-PU_S6_START42_V14B-v1__AODSIM.root"}
-#
-datasets["ttWChDR"] = {'label':"T_TuneZ2_tW-channel-DR","xSec":1,"processedEvents":1,"color":ROOT.kYellow+5 , "file":"/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TTbarDiLepBck_2013-08-10_15-48-14/patRefSel_diLep_cfg_debughistos_T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola__Fall11-PU_S6_START42_V14B-v1__AODSIM.root"}
 #####
 plots = ["patMuonsPFNM1isTrackerMuonN1Histo/isTrackerMuon",
 "patMuonsPFNM1isGlobalMuonN1Histo/isGlobalMuon",
