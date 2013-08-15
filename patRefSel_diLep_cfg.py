@@ -481,6 +481,7 @@ if doMuonN1:
   process.pPFN1 = cms.Path(pPF._seq)
   cutsList =  myMuonCuts["cuts"]
   for i,cut in enumerate(cutsList):
+    pPFN1Tmp = cms.Path(pPF._seq)
     print "contructiong for ",cut,"  ",i
     tmpCutList = cutsList[:i]+cutsList[i+1:]
     if cut.has_key("not"):
@@ -489,12 +490,14 @@ if doMuonN1:
     print tmpCutList
     tmpMuonN1Coll = cms.EDFilter("PATMuonSelector", src = cms.InputTag(myMuonCuts["coll"]),cut = cms.string(tmpCutList)  )
     tmpMuonN1CollName = tmpMuonN1Coll.src.value() +'NM1'+cut["label"]
-    setattr(process,tmpMuonN1CollName,tmpMuonN1Coll); process.pPFN1 += getattr(process,tmpMuonN1CollName)
+    setattr(process,tmpMuonN1CollName,tmpMuonN1Coll); pPFN1Tmp += getattr(process,tmpMuonN1CollName)
+    tmpMuonN1CollFilter = countPatMuons = cms.EDFilter("PATCandViewCountFilter", minNumber = cms.uint32(2),maxNumber = cms.uint32(999999), src = cms.InputTag(tmpMuonN1CollName)); setattr(process,tmpMuonN1CollName+"CountFilter",tmpMuonN1CollFilter);  pPFN1Tmp += getattr(process,tmpMuonN1CollName+"CountFilter")
     reCut = re.match('^\ *([^<>=]*)\ *[<>=]*[=]*\ *[^<>=]*$',cut["cut"]).group(1)
     print reCut
     tmpHist = copy.deepcopy(cut["hist"]);setattr(tmpHist,'name',cms.untracked.string(cut["label"]));setattr(tmpHist,'description',cms.untracked.string(cut["label"]));setattr(tmpHist,'plotquantity',cms.untracked.string(reCut));tmpHist.lazyParsing = cms.untracked.bool(True)
     tmpMuonN1Histo = cms.EDAnalyzer('CandViewHistoAnalyzer', src = cms.InputTag(tmpMuonN1CollName),histograms = cms.VPSet(tmpHist))
-    setattr(process, tmpMuonN1CollName+"N1Histo" ,tmpMuonN1Histo); process.pPFN1 += getattr(process,tmpMuonN1CollName+"N1Histo")
+    setattr(process, tmpMuonN1CollName+"N1Histo" ,tmpMuonN1Histo); pPFN1Tmp += getattr(process,tmpMuonN1CollName+"N1Histo")
+    setattr(process, 'pPFNM1'+cut["label"],pPFN1Tmp)
     
 process.mySelectedPatMuons = cms.EDFilter("PATMuonSelector", src = cms.InputTag("patMuonsPF"),
   #cut = cms.string('isTrackerMuon && isGlobalMuon && globalTrack.normalizedChi2 < 10. && innerTrack.numberOfValidHits > 10 && globalTrack.hitPattern.numberOfValidMuonHits > 0 && abs(eta) < 2.4 && pt > 20. && abs(dB) < 0.02 && (neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20') 
