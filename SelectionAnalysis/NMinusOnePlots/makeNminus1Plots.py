@@ -28,18 +28,17 @@ os.makedirs(plotFolder)
 print plotFolder
 datasets = {}
 # signal
-ttbarsignal = "/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TTbarDiLepSignal_2013-08-14_17-32-31/bookKeeping_2013-08-14_17-32-31.json"
+ttbarsignal = "/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TTbarDiLepSignal__2013-08-14_20-37-55/bookKeeping_2013-08-14_20-37-55.json"
 readJson(datasets , ttbarsignal)
 #datasets["signal"] = {'label':"TTbarDiLep","xSec":157.,"processedEvents":14792.,"color":ROOT.kGreen,"file":"/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TTbarDiLep_2013-08-10_19-48-59/patRefSel_diLep_cfg_debughistos_TT_TuneZ2_7TeV-mcatnlo__Fall11-PU_S6_START42_V14B-v1__AODSIM.root" }
 # ttbar bck
-ttbarbck = "/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TTbarDiLepBck_2013-08-14_17-39-10/bookKeeping_2013-08-14_17-39-10.json"
+ttbarbck = "/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TTbarDiLepBck_2013-08-14_20-37-03/bookKeeping_2013-08-14_20-37-03.json"
 readJson(datasets , ttbarbck)
 #datasets["ttbarBck"] = {'label':"TTbarNonDiLep","xSec":157.,"processedEvents":100000.,"color":ROOT.kRed , "file":"/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TTbarDiLepBck_2013-08-10_19-48-47/patRefSel_diLep_cfg_debughistos_TT_TuneZ2_7TeV-mcatnlo__Fall11-PU_S6_START42_V14B-v1__AODSIM.root"}
 # Tbar scaledown_tW-channel-DS
 import json
 nonTTbarBcks = None
-nonTTbarBckFile = "/.automount/net_rw/net__scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/Bck_Parallel_2013-08-12_19-06-44/bookKeeping_2013-08-12_19-06-44.json_updated_color"
-#with open('/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TMP_Bck_2013-08-11_20-25-26/bookKeeping_2013-08-11_20-25-26.json') as nonTTbarBckFile:
+nonTTbarBckFile = "/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/NonTTbarBck_Parallel_2013-08-16_11-00-11/bookKeeping_2013-08-16_11-00-11.json"
 readJson(datasets , nonTTbarBckFile)
 #####
 plots = ["patMuonsPFNM1isTrackerMuonN1Histo/isTrackerMuon",
@@ -54,17 +53,21 @@ plots = ["patMuonsPFNM1isTrackerMuonN1Histo/isTrackerMuon",
 Lint = 100.
 histMans = []
 stacksHists = []
-tobePlotted = ['TT_TuneZ2_7TeV-mcatnlo__Fall11-PU_S6_START42_V14B-v1__AODSIM_Background','TT_TuneZ2_7TeV-mcatnlo__Fall11-PU_S6_START42_V14B-v1__AODSIM_Signal']
+tobePlotted = ['TT_TuneZ2_7TeV-mcatnlo__Fall11-PU_S6_START42_V14B-v1__AODSIM_Background','TT_TuneZ2_7TeV-mcatnlo__Fall11-PU_S6_START42_V14B-v1__AODSIM_Signal','WJetsToLNu_TuneZ2_7TeV-madgraph-tauola__Fall11-PU_S6_START42_V14B-v1__AODSIM','T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola__Fall11-PU_S6_START42_V14B-v1__AODSIM','Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola__Fall11-PU_S6_START42_V14B-v1__AODSIM']
 datasetsToPlot = dict( [ (l,d) for l,d in datasets.iteritems() if l in tobePlotted ])
 ROOT.TH1.AddDirectory(False)
-for plot in plots:
+print datasetsToPlot.keys()
+for i,plot in enumerate(plots):
   histMan = MyHistFunctions.MyHistManager("hists_"+plot)
   tmpCan = ROOT.TCanvas("c_"+plot,plot,200,10,700,400);tmpCan.cd()
   for key,dataset in datasetsToPlot.iteritems():
     tmpHist = (ROOT.TFile(dataset["file"]).Get(plot)).Clone("hist_"+key+"_"+plot)  
     tmpHist.Sumw2(); MyHistFunctions.addOverFlowToLastBin(tmpHist);tmpHist.SetLineColor(dataset["color"])
-    print "test scaling ",dataset["processedEvents"]," " , dataset["xSec"]
+    if i == 0:
+      print "test scaling ",key," ",dataset["processedEvents"]," " , dataset["xSec"]
     LumSamp = (dataset["processedEvents"]/dataset["xSec"])
+    if i == 0:
+      print LumSamp
     tmpHist.Scale(Lint/LumSamp)
     histMan.saveHist(tmpHist)
   stackHists = MyHistFunctions.stackHists(histMan.hists)
