@@ -23,6 +23,7 @@ options.register ('eventsToProcess',
                    VarParsing.multiplicity.list,
                    VarParsing.varType.string,
                    "Events to process")
+options.register('skipEvents',0,VarParsing.multiplicity.singleton,VarParsing.varType.int,'skipEvents')
 options.register('runOnTTbar',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'runOnTTbar')
 options.register('N1TTbarDiLepBck',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'N1TTbarDiLepBck')
 options.parseArguments()
@@ -112,6 +113,7 @@ else:
 
 process.load( "TopQuarkAnalysis.Configuration.patRefSel_inputModule_cfi" )
 process.source.fileNames.append("/store/mc/Fall11/TT_TuneZ2_7TeV-mcatnlo/AODSIM/PU_S6_START42_V14B-v1/0001/FED956DF-7F2A-E111-8124-002618943958.root")
+process.source.skipEvents = cms.untracked.uint32(options.skipEvents)
 print "default source ",process.source.fileNames
 if options.inputFiles != cms.untracked.vstring():
  process.source.fileNames=options.inputFiles
