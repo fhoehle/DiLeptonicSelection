@@ -18,7 +18,7 @@ def readJson(dS , jsonFileName,debug=False):
   if debug:
     print "json ",jsonFileName," contains ",loadedJson.keys()
   for i,(key,data) in enumerate(loadedJson.iteritems()):
-    dS[key] = {"processedEvents":int(data['sample']["totalEvents"])}
+    dS[key] = {"processedEvents":int(data["totalEvents"])}
     possOutputFiles = None
     if debug:
       print "samp ",key," contain ",data.keys()
@@ -42,25 +42,26 @@ os.makedirs(plotFolder)
 print plotFolder
 datasets = {}
 # signal
-ttbarsignal = "/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TTbarSignal_Grid_2013-09-03_11-13-04/bookKeeping_2013-09-03_11-13-04__bookKeepingUpdated_2013-09-10_18-27-40.json"
+ttbarsignal = "/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TTbarSignal_Grid_2013-09-03_11-13-04/bookKeeping_2013-09-03_11-13-04__bookKeepingUpdated_2013-09-15_09-27-27.json"
 readJson(datasets , ttbarsignal)
-#datasets["signal"] = {'label':"TTbarDiLep","xSec":157.,"processedEvents":14792.,"color":ROOT.kGreen,"file":"/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TTbarDiLep_2013-08-10_19-48-59/patRefSel_diLep_cfg_debughistos_TT_TuneZ2_7TeV-mcatnlo__Fall11-PU_S6_START42_V14B-v1__AODSIM.root" }
 # ttbar bck
-ttbarbck = "/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TTbarBkg_Grid_2013-09-03_13-13-35/bookKeeping_2013-09-03_13-13-35__bookKeepingUpdated_2013-09-10_18-44-18.json"
+ttbarbck = "/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TTbarBkg_Grid_2013-09-03_13-13-35/bookKeeping_2013-09-03_13-13-35__bookKeepingUpdated_2013-09-15_09-28-21.json"
 readJson(datasets , ttbarbck,args.debug)
-#datasets["ttbarBck"] = {'label':"TTbarNonDiLep","xSec":157.,"processedEvents":100000.,"color":ROOT.kRed , "file":"/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/TTbarDiLepBck_2013-08-10_19-48-47/patRefSel_diLep_cfg_debughistos_TT_TuneZ2_7TeV-mcatnlo__Fall11-PU_S6_START42_V14B-v1__AODSIM.root"}
 # Tbar scaledown_tW-channel-DS
 import json
 nonTTbarBcks = None
 # wjets
-wJetsToLNuBckFile = "/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/NonTTbarBck_Parallel_2013-08-17_11-21-09/bookKeeping_2013-08-17_11-21-09__bookKeepingUpdated_2013-09-10_18-13-10.json"
+wJetsToLNuBckFile = "/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/NonTTbarBck_Parallel_2013-08-17_11-21-09/bookKeeping_2013-08-17_11-21-09__bookKeepingUpdated_2013-09-15_09-36-37.json"
 readJson(datasets ,wJetsToLNuBckFile,args.debug)
 # singleTopTwChDS
-singleTopTwChDSFile ='/.automount/net_rw/net__scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/BackGrounds_Nminus1/T_TuneZ2_tW-channel-DS_2013-09-12_11-30-31/bookKeeping_2013-09-12_11-30-31__bookKeepingUpdated_2013-09-14_15-28-22.json'
-readJson(datasets ,singleTopTwChDSFile,args.debug)
+#singleTopTwChDSFile ='/.automount/net_rw/net__scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/BackGrounds_Nminus1/T_TuneZ2_tW-channel-DS_2013-09-12_11-30-31/bookKeeping_2013-09-12_11-30-31__bookKeepingUpdated_2013-09-15_09-16-24.json'
+#readJson(datasets ,singleTopTwChDSFile,args.debug)
 # singleTopTwChDR
-singleTopTwChDRFile='/.automount/net_rw/net__scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/BackGrounds_Nminus1/T_TuneZ2_tW-channel-DR_2013-09-12_12-18-28/bookKeeping_2013-09-12_12-18-28__bookKeepingUpdated_2013-09-14_15-27-17.json'
+singleTopTwChDRFile='/.automount/net_rw/net__scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/BackGrounds_Nminus1/T_TuneZ2_tW-channel-DR_2013-09-12_12-18-28/bookKeeping_2013-09-12_12-18-28__bookKeepingUpdated_2013-09-15_09-50-05.json'
 readJson(datasets ,singleTopTwChDRFile,args.debug)
+## singleTopbarTwCHDR
+singleTopbarTwChDRFile='/.automount/net_rw/net__scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/BackGrounds_Nminus1/Tbar_TuneZ2_tW-channel-DR_2013-09-15_00-02-27/bookKeeping_2013-09-15_00-02-27__bookKeepingUpdated_2013-09-15_09-23-22.json'
+readJson(datasets ,singleTopbarTwChDRFile,args.debug)
 ###
 #datasets
 #####
@@ -76,13 +77,11 @@ plots = ["patMuonsPFNM1isTrackerMuonN1Histo/isTrackerMuon",
 Lint = 100.
 histMans = []
 stacksHists = []
-#tobePlotted = ['TT_TuneZ2_7TeV-mcatnlo__Fall11-PU_S6_START42_V14B-v1__AODSIM_Background','TT_TuneZ2_7TeV-mcatnlo__Fall11-PU_S6_START42_V14B-v1__AODSIM_Signal','WJetsToLNu_TuneZ2_7TeV-madgraph-tauola__Fall11-PU_S6_START42_V14B-v1__AODSIM','T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola__Fall11-PU_S6_START42_V14B-v1__AODSIM','Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola__Fall11-PU_S6_START42_V14B-v1__AODSIM']
 tobePlotted = [u'TT_TuneZ2_7TeV-mcatnlo__Fall11-PU_S6_START42_V14B-v1__AODSIM_Signal', u'TT_TuneZ2_7TeV-mcatnlo__Fall11-PU_S6_START42_V14B-v1__AODSIM_Bck', u'T_TuneZ2_tW-channel-DS_7TeV-powheg-tauola__Fall11-PU_S6_START42_V14B-v1__AODSIM', u'WJetsToLNu_TuneZ2_7TeV-madgraph-tauola__Fall11-PU_S6_START42_V14B-v1__AODSIM']
 #print "available datasets ",datasets.keys()
-datasetsToPlot = dict( [ (l,d) for l,d in datasets.iteritems() if l in tobePlotted ])
+datasetsToPlot = datasets #dict( [ (l,d) for l,d in datasets.iteritems() if l in tobePlotted ])
 ROOT.TH1.AddDirectory(False)
 #print " plotted datasets ",datasetsToPlot.keys()
-debug = True
 for i,plot in enumerate(plots):
   histMan = MyHistFunctions.MyHistManager("hists_"+plot)
   tmpCan = ROOT.TCanvas("c_"+plot,plot,200,10,700,400);tmpCan.cd()
@@ -91,16 +90,13 @@ for i,plot in enumerate(plots):
     setattr(tmpHist,'label',dataset["label"] )
     setattr(tmpHist,'copyIt',['label'])
     tmpHist.Sumw2(); MyHistFunctions.addOverFlowToLastBin(tmpHist);tmpHist.SetLineColor(dataset["color"])
-    if debug:
-      print "test scaling ",key," ",dataset["processedEvents"]," " , dataset["xSec"] , " i ",i
     LumSamp = (dataset["processedEvents"]/dataset["xSec"])
-    if debug:
-      print "sample factor ",Lint/LumSamp
     tmpHist.Scale(Lint/LumSamp)
-    if debug:
-      print (plot," ",dataset["label"]," ", tmpHist.Integral())
+    if args.debug:
+     print "test scaling ",key," ",dataset["processedEvents"]," " , dataset["xSec"] , " i ",i
+     print (plot," ",dataset["label"]," ", tmpHist.Integral())
     histMan.saveHist(tmpHist)
-  stackHists = MyHistFunctions.stackHists(histMan.hists,debug=True)
+  stackHists = MyHistFunctions.stackHists(histMan.hists,debug=args.debug)
   histMans.append(histMan)
   stacksHists.append(stackHists)
   stackHists.createStack();stackHists.plotStack(False,"HIST");stackHists.drawLegend()
