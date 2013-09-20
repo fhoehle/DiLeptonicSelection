@@ -32,6 +32,7 @@ def readJson(dS , jsonFileName,debug=False):
     dS[key]["color"]=data["sample"]["color"]
     dS[key]["xSec"]=float(data["sample"]["xSec"])
     dS[key]["label"]=data["sample"]["label"]
+  return loadedJson.keys()
 ########################################
 ROOT.gROOT.SetStyle("Plain")
 ####################
@@ -57,11 +58,22 @@ readJson(datasets ,wJetsToLNuBckFile,args.debug)
 #singleTopTwChDSFile ='/.automount/net_rw/net__scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/BackGrounds_Nminus1/T_TuneZ2_tW-channel-DS_2013-09-12_11-30-31/bookKeeping_2013-09-12_11-30-31__bookKeepingUpdated_2013-09-15_09-16-24.json'
 #readJson(datasets ,singleTopTwChDSFile,args.debug)
 # singleTopTwChDR
-singleTopTwChDRFile='/.automount/net_rw/net__scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/BackGrounds_Nminus1/T_TuneZ2_tW-channel-DR_2013-09-12_12-18-28/bookKeeping_2013-09-12_12-18-28__bookKeepingUpdated_2013-09-15_09-50-05.json'
-readJson(datasets ,singleTopTwChDRFile,args.debug)
+singleTop = [
+'/.automount/net_rw/net__scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/BackGrounds_Nminus1/T_TuneZ2_tW-channel-DR_2013-09-12_12-18-28/bookKeeping_2013-09-12_12-18-28__bookKeepingUpdated_2013-09-15_09-50-05.json'
+,'/.automount/net_rw/net__scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/BackGrounds_Nminus1/Tbar_TuneZ2_tW-channel-DR_2013-09-15_00-02-27/bookKeeping_2013-09-15_00-02-27__bookKeepingUpdated_2013-09-15_09-23-22.json'
+,'/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/BackGrounds_Nminus1/T_TuneZ2_s-channel_2013-09-17_20-12-29/bookKeeping_2013-09-17_20-12-29__bookKeepingUpdated_2013-09-19_13-55-09.json'
+,'/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/BackGrounds_Nminus1/Tbar_TuneZ2_s-channel_2013-09-17_20-06-46/bookKeeping_2013-09-17_20-06-46__bookKeepingUpdated_2013-09-19_13-01-16.json'
+,'/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/BackGrounds_Nminus1/T_TuneZ2_t-channel_2013-09-17_20-12-46/bookKeeping_2013-09-17_20-12-46__bookKeepingUpdated_2013-09-19_11-43-25.json'
+,'/net/scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/BackGrounds_Nminus1/Tbar_TuneZ2_t-channel_2013-09-17_20-12-54/bookKeeping_2013-09-17_20-12-54__bookKeepingUpdated_2013-09-19_11-59-07.json'
+]
+mergeSingleTop = []
+for singleTopSet in singleTop:
+  mergeSingleTop.extend(readJson(datasets ,singleTopSet,args.debug))
+#singleTopTwChDRFile='/.automount/net_rw/net__scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/BackGrounds_Nminus1/T_TuneZ2_tW-channel-DR_2013-09-12_12-18-28/bookKeeping_2013-09-12_12-18-28__bookKeepingUpdated_2013-09-15_09-50-05.json'
+#readJson(datasets ,singleTopTwChDRFile,args.debug)
 ## singleTopbarTwCHDR
-singleTopbarTwChDRFile='/.automount/net_rw/net__scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/BackGrounds_Nminus1/Tbar_TuneZ2_tW-channel-DR_2013-09-15_00-02-27/bookKeeping_2013-09-15_00-02-27__bookKeepingUpdated_2013-09-15_09-23-22.json'
-readJson(datasets ,singleTopbarTwChDRFile,args.debug)
+#singleTopbarTwChDRFile='/.automount/net_rw/net__scratch_cms/institut_3b/hoehle/Nminus1_DiLepSelection/BackGrounds_Nminus1/Tbar_TuneZ2_tW-channel-DR_2013-09-15_00-02-27/bookKeeping_2013-09-15_00-02-27__bookKeepingUpdated_2013-09-15_09-23-22.json'
+#readJson(datasets ,singleTopbarTwChDRFile,args.debug)
 ###
 #datasets
 #####
@@ -79,25 +91,37 @@ histMans = []
 stacksHists = []
 tobePlotted = [u'TT_TuneZ2_7TeV-mcatnlo__Fall11-PU_S6_START42_V14B-v1__AODSIM_Signal', u'TT_TuneZ2_7TeV-mcatnlo__Fall11-PU_S6_START42_V14B-v1__AODSIM_Bck', u'T_TuneZ2_tW-channel-DS_7TeV-powheg-tauola__Fall11-PU_S6_START42_V14B-v1__AODSIM', u'WJetsToLNu_TuneZ2_7TeV-madgraph-tauola__Fall11-PU_S6_START42_V14B-v1__AODSIM']
 #print "available datasets ",datasets.keys()
-datasetsToPlot = datasets #dict( [ (l,d) for l,d in datasets.iteritems() if l in tobePlotted ])
+datasetsToPlot = []
+singleTop_twChDR_ToMerge = ['Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola__Fall11-PU_S6_START42_V14B-v1__AODSIM','T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola__Fall11-PU_S6_START42_V14B-v1__AODSIM']
+singleTop = tools.analysisSample(Lint)
+test = [ds for k,ds in datasets.iteritems() if k in mergeSingleTop]
+singleTop.loadFromDataset(test,'singleTop')
+singleTop.merge()
+for k,ds in datasets.iteritems(): #dict( [ (l,d) for l,d in datasets.iteritems() if l in tobePlotted ])
+  tmpAnDat = tools.analysisSample(Lint)
+  tmpAnDat.loadFromDataset(ds)
+  if not k in mergeSingleTop:
+    datasetsToPlot.append(tmpAnDat)
+datasetsToPlot.append(singleTop)
 ROOT.TH1.AddDirectory(False)
 #print " plotted datasets ",datasetsToPlot.keys()
 for i,plot in enumerate(plots):
   histMan = MyHistFunctions.MyHistManager("hists_"+plot)
   tmpCan = ROOT.TCanvas("c_"+plot,plot,200,10,700,400);tmpCan.cd()
-  for key,dataset in datasetsToPlot.iteritems():
-    tmpHist = (ROOT.TFile(dataset["file"]).Get(plot)).Clone("hist_"+key+"_"+plot) 
-    setattr(tmpHist,'label',dataset["label"] )
+  for anaDataset in datasetsToPlot:
+    tmpHist = anaDataset.get(plot).Clone("hist_"+anaDataset.label+"_"+plot) 
+    setattr(tmpHist,'label',anaDataset.label )
     setattr(tmpHist,'copyIt',['label'])
-    tmpHist.Sumw2(); MyHistFunctions.addOverFlowToLastBin(tmpHist);tmpHist.SetLineColor(dataset["color"])
-    LumSamp = (dataset["processedEvents"]/dataset["xSec"])
-    tmpHist.Scale(Lint/LumSamp)
     if args.debug:
-     print "test scaling ",key," ",dataset["processedEvents"]," " , dataset["xSec"] , " i ",i
-     print (plot," ",dataset["label"]," ", tmpHist.Integral())
+     print "test scaling ",anaDataset.label," ",anaDataset.processedLumi," " , anaDataset.xSec , " ", len(anaDataset.datasets)," i ",i
+     print (plot," ",anaDataset.label," ", tmpHist.Integral())
     histMan.saveHist(tmpHist)
   stackHists = MyHistFunctions.stackHists(histMan.hists,debug=args.debug)
   histMans.append(histMan)
   stacksHists.append(stackHists)
-  stackHists.createStack();stackHists.plotStack(False,"HIST");stackHists.drawLegend()
+  stackHists.createStack();
+  print "before plot ",len(MyHistFunctions.getHistsOfPad())
+  stackHists.plotStack(False,"HIST");
+  print "after plot ",len(MyHistFunctions.getHistsOfPad())
+  legend = MyHistFunctions.myLegend(debug=args.debug); legend.createLegend();legend.drawLegend()
   tmpCan.SaveAs(((plotFolder + os.path.sep ) if plotFolder != "" else "") + subSlash(tmpCan.GetName())+".pdf");tmpCan.SaveAs(((plotFolder + os.path.sep ) if plotFolder != "" else "") + subSlash(tmpCan.GetName())+".root")
