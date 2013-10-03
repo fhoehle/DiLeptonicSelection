@@ -3,10 +3,22 @@ import os,imp
 cfgFileTools = imp.load_source('module.name', os.getenv('CMSSW_BASE')+'/MyCMSSWAnalysisTools/Tools/cfgFileTools.py')
 debugCollection = cfgFileTools.debugCollection
 AddFilters = cfgFileTools.AddFilters
-
 ###################
-def doDiElectronPath(process,pPF,debugIt = False):
+class myElectronPath:
+  def __init__(self,runData,dataElectronTrigger):
+    self.runData = runData
+    self.dataElectronTrigger = dataElectronTrigger
+  def doDiElectronPath(self,process,pPF,debugIt = False):
+    if debugIt:
+        candPtHistogram = cms.PSet(min = cms.untracked.double(0), max = cms.untracked.double(400), nbins =  cms.untracked.int32 (200), name = cms.untracked.string('Pt'), description  = cms.untracked.string(''), plotquantity = cms.untracked.string('pt'))
+        candEtaHistogram = cms.PSet(min = cms.untracked.double(-5), max = cms.untracked.double(5), nbins =  cms.untracked.int32 (200), name = cms.untracked.string('Eta'), description  = cms.untracked.string(''), plotquantity = cms.untracked.string('eta'))
     ## my electron selection
+    Zmax=106;Zmin=76
+    diElectronTriggers = ""
+    if self.runData:
+      diElectronTriggers = self.dataElectronTrigger
+    else:
+      diElectronTriggers = "HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2"
     process.myDiElectronPath = cms.Path(pPF._seq); localPath = process.myDiElectronPath
     process.myDiElectronTriggerCheck = cms.EDFilter("TriggerResultsFilter",l1tIgnoreMask = cms.bool(False),l1tResults = cms.InputTag(""),l1techIgnorePrescales = cms.bool(False),    hltResults = cms.InputTag("TriggerResults","","HLT"),  triggerConditions = cms.vstring(diElectronTriggers),throw = cms.bool(False), daqPartitions = cms.uint32(1));  localPath += process.myDiElectronTriggerCheck;#analyzeColl("patElectronsPF",localPath,process,"diETriggerOK")
     coll='patElectronsPF'

@@ -5,12 +5,21 @@
 #
 def createCut(cuts):
   return ''.join([c['cut'] if i == 0 else " && "+c['cut'] for i,c in enumerate(cuts) ])
-
-import imp,os
+def getTriggerForRunRange(minRun,maxRun,triggerRunRanges):
+  minRunTrig = None; maxRunTrig = None
+  for trig,trigRange in triggerRunRanges.iteritems():
+    print trig," ",trigRange," ",minRun," ",maxRun
+    if minRun >= trigRange[0] and minRun <= trigRange[1]:
+      minRunTrig = trig if not minRunTrig else minRunTrig+" OR "+trig
+    if maxRun >= trigRange[0] and maxRun <= trigRange[1]:
+      maxRunTrig = trig if not maxRunTrig else maxRunTrig+" OR "+trig
+    print 'minRunTrig' ,minRunTrig,' maxRunTrig ',maxRunTrig
+  return minRunTrig if minRunTrig == maxRunTrig else None
+import imp,os,sys,re
 executeDiElectronPath = False
 diMuon_cfg = imp.load_source('module.name', os.getenv('CMSSW_BASE')+'/DiLeptonicSelection/diMuon_cfg.py')
 diElectron_cfg = imp.load_source('module.name', os.getenv('CMSSW_BASE')+'/DiLeptonicSelection/diElectron_cfg.py')
-diElectron_cfg = imp.load_source('module.name', os.getenv('CMSSW_BASE')+'/DiLeptonicSelection/diEleMuon_cfg.py')
+diEleMuon_cfg = imp.load_source('module.name', os.getenv('CMSSW_BASE')+'/DiLeptonicSelection/diEleMuon_cfg.py')
 cfgFileTools = imp.load_source('module.name', os.getenv('CMSSW_BASE')+'/MyCMSSWAnalysisTools/Tools/cfgFileTools.py')
 debugCollection = cfgFileTools.debugCollection
 executeDiMuonPath = True
@@ -26,7 +35,34 @@ options.register ('eventsToProcess',
 options.register('skipEvents',0,VarParsing.multiplicity.singleton,VarParsing.varType.int,'skipEvents')
 options.register('runOnTTbar',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'runOnTTbar')
 options.register('N1TTbarDiLepBck',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'N1TTbarDiLepBck')
+options.register('runOnData',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'runOnData')
+options.register('runRange','',VarParsing.multiplicity.singleton,VarParsing.varType.string,'runRange used for running on data to estimate trigger')
+options.register('runOnlyDiMuon',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run only di muon path')
+options.register('runOnlyDiElectron',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run only di electron path')
+options.register('runOnlyElectronMuon',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run only electron muon path')
 options.parseArguments()
+if options.runOnlyDiMuon:
+  executeDiElectronMuonPath = False
+  executeDiElectronPath = False
+  executeDiMuonPath = True
+if options.runOnlyDiElectron:
+  executeDiElectronPath = True
+  executeDiMuonPath = False
+  executeDiElectronMuonPath = False
+if options.runOnlyElectronMuon:
+  executeDiElectronMuonPath = True
+  executeDiMuonPath = False  
+  executeDiElectronPath = False
+if sum([options.runOnlyDiMuon,options.runOnlyDiElectron,options.runOnlyElectronMuon]) > 1:
+  sys.exit('only one path can be the only')
+
+reRunRange = re.match('^([0-9]+)-([0-9]+)$',options.runRange)
+print "options.runRange",options.runRange
+minRun = None ; maxRun = None
+if options.runOnData: 
+  if not reRunRange or len(reRunRange.groups()) != 2 :
+    sys.exit('runRange wrong should be 123-234')
+  minRun=int(reRunRange.group(1));maxRun=int(reRunRange.group(2))
 import FWCore.ParameterSet.Config as cms
 def analyzeColl(coll,path,process,prefix=''):
  newmod = cms.EDAnalyzer("MyCandPrintAnalyzer", src = cms.InputTag(coll), prefix = cms.string(prefix+"test"+coll),
@@ -208,6 +244,10 @@ if useL7Parton:
   jecLevels.append( 'L7Parton' )
 
 ### Switch configuration
+if options.runOnData:
+  from PhysicsTools.PatAlgos.tools.coreTools import runOnData
+  runOnData(process, names = [ 'All' ])
+
 
 import PhysicsTools.PatAlgos.tools.pfTools as pfTools
 pfTools.usePF2PAT( process
@@ -247,6 +287,11 @@ pfTools.applyPostfix( process, 'patMuons'    , postfix ).pvSrc = cms.InputTag( p
 import TopQuarkAnalysis.Configuration.patRefSel_refMuJets_cfi as patRefSel_refMuJets_cfi
 
 # remove MC matching, object cleaning, objects etc.
+## remove MCMatching if run on Data
+if options.runOnData:
+  from PhysicsTools.PatAlgos.tools.coreTools import runOnData
+  runOnData(process, names = [ 'PFAll' ],postfix ='PF')
+
 if not runOnMC:
   runOnData( process
            , names = [ 'PFAll' ]
@@ -375,21 +420,22 @@ else:
 ### Trigger matching configuration
 from PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cfi import patTrigger
 from TopQuarkAnalysis.Configuration.patRefSel_triggerMatching_cfi import patMuonTriggerMatch
-import PhysicsTools.PatAlgos.tools.trigTools as trigTools
-triggerProducerPF = patTrigger.clone()
-setattr( process, 'patTrigger' + postfix, triggerProducerPF )
-triggerMatchPF = patMuonTriggerMatch.clone( matchedCuts = triggerObjectSelection )
-setattr( process, 'triggerMatch' + postfix, triggerMatchPF )
-trigTools.switchOnTriggerMatchEmbedding( process
-                             , triggerProducer = 'patTrigger' + postfix
-                             , triggerMatchers = [ 'triggerMatch' + postfix ]
-                             , sequence        = 'patPF2PATSequence' + postfix
-                             , postfix         = postfix
-                             )
-trigTools.removeCleaningFromTriggerMatching( process
-                                 , sequence = 'patPF2PATSequence' + postfix
-                                 )
-getattr( process, 'intermediatePatMuons' + postfix ).src = cms.InputTag( 'selectedPatMuons' + postfix + 'TriggerMatch' )
+if not options.runOnData:
+  import PhysicsTools.PatAlgos.tools.trigTools as trigTools
+  triggerProducerPF = patTrigger.clone()
+  setattr( process, 'patTrigger' + postfix, triggerProducerPF )
+  triggerMatchPF = patMuonTriggerMatch.clone( matchedCuts = triggerObjectSelection )
+  setattr( process, 'triggerMatch' + postfix, triggerMatchPF )
+  trigTools.switchOnTriggerMatchEmbedding( process
+                               , triggerProducer = 'patTrigger' + postfix
+                               , triggerMatchers = [ 'triggerMatch' + postfix ]
+                               , sequence        = 'patPF2PATSequence' + postfix
+                               , postfix         = postfix
+                               )
+  trigTools.removeCleaningFromTriggerMatching( process
+                                   , sequence = 'patPF2PATSequence' + postfix
+                                   )
+  getattr( process, 'intermediatePatMuons' + postfix ).src = cms.InputTag( 'selectedPatMuons' + postfix + 'TriggerMatch' )
 
 
 ###
@@ -534,15 +580,45 @@ if debugIt:
  process.TFileService=cms.Service("TFileService",fileName=cms.string('patRefSel_diLep_cfg_debughistos.root'))
 # DI Muon Signal 
 if executeDiMuonPath:
-  diMuon_cfg.doDiMuonPath(process,pPF,True)
+  diMuontrigger = ""
+  if options.runOnData:
+    diMuonDataUseTriggers = {'HLT_DoubleMu7_v*':[0,165208],'HLT_Mu13_Mu8_v*':[165209,178419],'HLT_Mu17_Mu8_v* OR HLT_Mu17_TkMu8_v*':[178420,999999]}
+    diMuonDataUseTrigger = getTriggerForRunRange(minRun,maxRun,diMuonDataUseTriggers)
+    if not diMuonDataUseTrigger:
+      sys.exit('not suitable run range given '+';'.join([k+":"+str(r[0])+"-"+str(r[1]) for k,r in diMuonDataUseTriggers.iteritems()])) 
+    diMuontrigger=diMuonDataUseTrigger
+  else:
+    diMuontrigger="HLT_DoubleMu6_v1"
+  myMuonPath = diMuon_cfg.myMuonPath(options.runOnData,diMuontrigger)
+  myMuonPath.doDiMuonPath(process,pPF,True)
 #DI Electron Signal
 #executeDiElectronPath = True
 if executeDiElectronPath:
-  diElectron_cfg.doDiElectronPath(process,pPF,True)
+  diElectrontrigger = ""
+  if options.runOnData:
+    diElectronDataUseTriggers = {'HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v*':[0,170901],'HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*':[170902,999999]}
+    diElectronDataUseTrigger = getTriggerForRunRange(minRun,maxRun,diElectronDataUseTriggers)
+    if not diElectronDataUseTrigger:
+       sys.exit('not suitable run range given '+';'.join([k+":"+str(r[0])+"-"+str(r[1]) for k,r in diElectronDataUseTriggers.iteritems()]))
+    diElectrontrigger = diElectronDataUseTrigger
+  else:
+    diElectrontrigger = "HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2"
+  myElectronPath = diElectron_cfg.myElectronPath(options.runOnData,diElectrontrigger)
+  myElectronPath.doDiElectronPath(process,pPF,True)
   ## my electron selection
 # Di EMu Signal
 if executeDiElectronMuonPath: 
-  diEleMuon_cfg.doDiEleMuonPath(process,pPF,True)
+  electronMuontrigger = ""
+  if options.runOnData:
+    electronMuonDataUseTrigger = {'HLT_Mu8_Ele17_CaloIdL_v*':[0,167913],'HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v*':[167914,999999],'HLT_Mu17_Ele8_CaloIdL_v*':[0,175972] ,'HLT_Mu17_Ele8_CaloIdT_CaloIsoVL-v*':[175973,999999]}
+    electronMuonDataUseTrigger = getTriggerForRunRange(minRun,maxRun,electronMuonDataUseTrigger)
+    if not electronMuonDataUseTrigger:
+      sys.exit('not suitable run range given '+';'.join([k+":"+str(r[0])+"-"+str(r[1]) for k,r in electronMuonDataUseTrigger.iteritems()]))
+    electronMuontrigger = electronMuonDataUseTrigger
+  else:
+    electronMuontrigger = 'HLT_Mu10_Ele10_CaloIdL_v3 OR HLT_Mu8_Ele17_CaloIdL_v2'
+  myElectronMuonPath = diEleMuon_cfg.myElectronMuonPath(options.runOnData,electronMuontrigger)
+  myElectronMuonPath.doDiEleMuonPath(process,pPF,True)
   ##DiElectronMuon
 
 ## pPF configuration continues ...
@@ -554,11 +630,12 @@ process.out.outputCommands = cms.untracked.vstring('keep *_*_*_'+process.name_()
 
 # simple production
 process.simpleProd = cms.Path()
-process.addMyPileupInfo = cms.EDProducer("AddPileUpWeightsProducer", vertexSrc = cms.InputTag("offlinePrimaryVertices"),
+if not options.runOnData:
+  process.addMyPileupInfo = cms.EDProducer("AddPileUpWeightsProducer", vertexSrc = cms.InputTag("offlinePrimaryVertices"),
    pileupFile1 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/data/JeremyFWK_PU3DMC.root"),
    pileupFile2 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/data/JeremyFWK_dataPUhisto_2011AB_73.5mb_pixelLumi_diffBinning_bin25.root"),
    PUHistname1 = cms.string("histoMCPU"), PUHistname2 = cms.string("pileup")); process.simpleProd += process.addMyPileupInfo
-process.MessageLogger.debugModules.extend(['addMyPileupInfo'])
+  process.MessageLogger.debugModules.extend(['addMyPileupInfo'])
 process.MessageLogger.destinations.append('myDebugFile')
 process.MessageLogger.myDebugFile = cms.untracked.PSet(threshold = cms.untracked.string('INFO'),filename = cms.untracked.string('patRefSel_diLep_cfg_myDebugFile.log'))
 #process.addMyBTagWeights = cms.EDProducer("AddMyBTagWeights"); process.simpleProd += process.addMyBTagWeights
