@@ -120,8 +120,7 @@ for i,plot in enumerate(plots):
   histMans.append(histMan)
   stacksHists.append(stackHists)
   stackHists.createStack();
-  print "before plot ",len(MyHistFunctions.getHistsOfPad())
   stackHists.plotStack(False,"HIST");
-  print "after plot ",len(MyHistFunctions.getHistsOfPad())
+  MyHistFunctions.deleteAllStatboxes()
   legend = MyHistFunctions.myLegend(debug=args.debug); legend.createLegend();legend.drawLegend()
   tmpCan.SaveAs(((plotFolder + os.path.sep ) if plotFolder != "" else "") + subSlash(tmpCan.GetName())+".pdf");tmpCan.SaveAs(((plotFolder + os.path.sep ) if plotFolder != "" else "") + subSlash(tmpCan.GetName())+".root")
