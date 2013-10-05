@@ -15,6 +15,18 @@ def getTriggerForRunRange(minRun,maxRun,triggerRunRanges):
       maxRunTrig = trig if not maxRunTrig else maxRunTrig+" OR "+trig
     print 'minRunTrig' ,minRunTrig,' maxRunTrig ',maxRunTrig
   return minRunTrig if minRunTrig == maxRunTrig else None
+triggersUsedForAnalysis = {
+  'diMuon':{}
+  ,'diElectron':{}
+  ,'electronMuon':{}
+}
+electronMuonDataUseTriggers = {'HLT_Mu8_Ele17_CaloIdL_v*':[0,167913],'HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v*':[167914,999999],'HLT_Mu17_Ele8_CaloIdL_v*':[0,175972] ,'HLT_Mu17_Ele8_CaloIdT_CaloIsoVL-v*':[175973,999999]}
+triggersUsedForAnalysis['electronMuon']['data'] = electronMuonDataUseTriggers; triggersUsedForAnalysis['electronMuon']['mc']='HLT_Mu10_Ele10_CaloIdL_v3 OR HLT_Mu8_Ele17_CaloIdL_v2'
+diElectronDataUseTriggers = {'HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v*':[0,170901],'HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*':[170902,999999]}
+triggersUsedForAnalysis['diElectron']['data']=diElectronDataUseTriggers; triggersUsedForAnalysis['diElectron']['mc']="HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2"
+diMuonDataUseTriggers = {'HLT_DoubleMu7_v*':[0,165208],'HLT_Mu13_Mu8_v*':[165209,178419],'HLT_Mu17_Mu8_v* OR HLT_Mu17_TkMu8_v*':[178420,999999]}
+triggersUsedForAnalysis['diMuon']['data'] =diMuonDataUseTriggers; triggersUsedForAnalysis['diMuon']['mc']= "HLT_DoubleMu6_v1"
+
 import imp,os,sys,re
 executeDiElectronPath = False
 diMuon_cfg = imp.load_source('module.name', os.getenv('CMSSW_BASE')+'/DiLeptonicSelection/diMuon_cfg.py')
@@ -581,42 +593,45 @@ if debugIt:
 # DI Muon Signal 
 if executeDiMuonPath:
   diMuontrigger = ""
+  triggers=triggersUsedForAnalysis['diMuon']
   if options.runOnData:
-    diMuonDataUseTriggers = {'HLT_DoubleMu7_v*':[0,165208],'HLT_Mu13_Mu8_v*':[165209,178419],'HLT_Mu17_Mu8_v* OR HLT_Mu17_TkMu8_v*':[178420,999999]}
-    diMuonDataUseTrigger = getTriggerForRunRange(minRun,maxRun,diMuonDataUseTriggers)
+    dataTriggers = triggers['data']
+    diMuonDataUseTrigger = getTriggerForRunRange(minRun,maxRun,dataTriggers)
     if not diMuonDataUseTrigger:
-      sys.exit('not suitable run range given '+';'.join([k+":"+str(r[0])+"-"+str(r[1]) for k,r in diMuonDataUseTriggers.iteritems()])) 
+      sys.exit('not suitable run range given '+';'.join([k+":"+str(r[0])+"-"+str(r[1]) for k,r in dataTriggers.iteritems()])) 
     diMuontrigger=diMuonDataUseTrigger
   else:
-    diMuontrigger="HLT_DoubleMu6_v1"
+    diMuontrigger=triggers['mc']
   myMuonPath = diMuon_cfg.myMuonPath(options.runOnData,diMuontrigger)
   myMuonPath.doDiMuonPath(process,pPF,True)
 #DI Electron Signal
 #executeDiElectronPath = True
 if executeDiElectronPath:
   diElectrontrigger = ""
+  triggers=triggersUsedForAnalysis['diElectron']
   if options.runOnData:
-    diElectronDataUseTriggers = {'HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v*':[0,170901],'HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*':[170902,999999]}
-    diElectronDataUseTrigger = getTriggerForRunRange(minRun,maxRun,diElectronDataUseTriggers)
+    dataTriggers=triggers['data']
+    diElectronDataUseTrigger = getTriggerForRunRange(minRun,maxRun,dataTriggers)
     if not diElectronDataUseTrigger:
-       sys.exit('not suitable run range given '+';'.join([k+":"+str(r[0])+"-"+str(r[1]) for k,r in diElectronDataUseTriggers.iteritems()]))
+       sys.exit('not suitable run range given '+';'.join([k+":"+str(r[0])+"-"+str(r[1]) for k,r in idataTriggers.iteritems()]))
     diElectrontrigger = diElectronDataUseTrigger
   else:
-    diElectrontrigger = "HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2"
+    diElectrontrigger = triggers['mc']
   myElectronPath = diElectron_cfg.myElectronPath(options.runOnData,diElectrontrigger)
   myElectronPath.doDiElectronPath(process,pPF,True)
   ## my electron selection
 # Di EMu Signal
 if executeDiElectronMuonPath: 
   electronMuontrigger = ""
+  triggers=triggersUsedForAnalysis['electronMuon']
   if options.runOnData:
-    electronMuonDataUseTrigger = {'HLT_Mu8_Ele17_CaloIdL_v*':[0,167913],'HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v*':[167914,999999],'HLT_Mu17_Ele8_CaloIdL_v*':[0,175972] ,'HLT_Mu17_Ele8_CaloIdT_CaloIsoVL-v*':[175973,999999]}
-    electronMuonDataUseTrigger = getTriggerForRunRange(minRun,maxRun,electronMuonDataUseTrigger)
+    dataTriggers=triggers['data']
+    electronMuonDataUseTrigger = getTriggerForRunRange(minRun,maxRun,dataTriggers)
     if not electronMuonDataUseTrigger:
-      sys.exit('not suitable run range given '+';'.join([k+":"+str(r[0])+"-"+str(r[1]) for k,r in electronMuonDataUseTrigger.iteritems()]))
+      sys.exit('not suitable run range given '+';'.join([k+":"+str(r[0])+"-"+str(r[1]) for k,r in dataTriggers.iteritems()]))
     electronMuontrigger = electronMuonDataUseTrigger
   else:
-    electronMuontrigger = 'HLT_Mu10_Ele10_CaloIdL_v3 OR HLT_Mu8_Ele17_CaloIdL_v2'
+    electronMuontrigger = triggers['mc']
   myElectronMuonPath = diEleMuon_cfg.myElectronMuonPath(options.runOnData,electronMuontrigger)
   myElectronMuonPath.doDiEleMuonPath(process,pPF,True)
   ##DiElectronMuon
