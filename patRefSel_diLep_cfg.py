@@ -52,7 +52,9 @@ options.register('runRange','',VarParsing.multiplicity.singleton,VarParsing.varT
 options.register('runOnlyDiMuon',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run only di muon path')
 options.register('runOnlyDiElectron',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run only di electron path')
 options.register('runOnlyElectronMuon',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run only electron muon path')
+print "args ",sys.argv
 options.parseArguments()
+print "these options where given",options.__dict__['_setDuringParsing']
 if options.runOnlyDiMuon:
   executeDiElectronMuonPath = False
   executeDiElectronPath = False
@@ -302,8 +304,8 @@ import TopQuarkAnalysis.Configuration.patRefSel_refMuJets_cfi as patRefSel_refMu
 ## remove MCMatching if run on Data
 if options.runOnData:
   from PhysicsTools.PatAlgos.tools.coreTools import runOnData
-  runOnData(process, names = [ 'PFAll' ],postfix ='PF')
-
+  runOnData(process, names = [ 'PFAll' ],postfix =postfix)
+  print "removeMatching"
 if not runOnMC:
   runOnData( process
            , names = [ 'PFAll' ]
