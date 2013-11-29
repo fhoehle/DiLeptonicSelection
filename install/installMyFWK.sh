@@ -61,7 +61,7 @@ addpkg PhysicsTools/Utilities                           V08-03-17
 #####
 pkgs=(
   "CMSSW_MyAnalyzers src/ V00-01"
-  "CMSSW_MyProducers src/ V00-03"
+  "CMSSW_MyProducers src/"
   "CMSSW_MyDataFormats src/ V00-01"
   "CMSSW_MyFilters src/  V00-01"
 )
@@ -69,7 +69,9 @@ pkgs=(
 for idx in ${!pkgs[*]}; do
   cd $CMSSW_BASE/`echo ${pkgs[$idx]} | awk '{print $2}'`
   getGitPackage `echo ${pkgs[$idx]} | awk '{print $1}'`
-  git checkout `echo ${pkgs[$idx]} | awk '{print $3}'`
+  if [ "X`echo ${pkgs[$idx]} | awk '{print $3}'`" != "X" ]; then
+    git checkout `echo ${pkgs[$idx]} | awk '{print $3}'`
+  fi
   if  [ "X`echo ${pkgs[$idx]} | awk '{print $4}'`" != "X" ]; then
     echo "calling additional command "`echo ${pkgs[$idx]} | awk '{print $4}'`
     eval `echo ${pkgs[$idx]} | awk '{print $4}'`
