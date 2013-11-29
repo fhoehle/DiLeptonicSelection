@@ -139,7 +139,7 @@ globalTagMC   = 'START42_V17'
 outputFile = 'patRefSel_diLep_cfg_output.root'
 
 # event frequency of Fwk report
-fwkReportEvery = 1
+fwkReportEvery = 100
 
 # switch for 'TrigReport'/'TimeReport' at job end
 wantSummary = True
