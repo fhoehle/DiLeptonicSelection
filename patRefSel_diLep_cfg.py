@@ -214,6 +214,7 @@ process.step0a = triggerResults.clone(
 
 ### Good vertex selection
 process.load( "TopQuarkAnalysis.Configuration.patRefSel_goodVertex_cfi" )
+process.goodOfflinePrimaryVertices.filter=True
 process.step0b = process.goodOfflinePrimaryVertices.clone( filter = True )
 
 ### Event cleaning
