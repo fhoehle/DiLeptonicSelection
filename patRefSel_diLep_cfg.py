@@ -52,6 +52,7 @@ options.register('runRange','',VarParsing.multiplicity.singleton,VarParsing.varT
 options.register('runOnlyDiMuon',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run only di muon path')
 options.register('runOnlyDiElectron',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run only di electron path')
 options.register('runOnlyElectronMuon',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run only electron muon path')
+options.register('runALLpaths',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run all three paths')
 print "args ",sys.argv
 options.parseArguments()
 print "these options where given",options.__dict__['_setDuringParsing']
@@ -67,7 +68,12 @@ if options.runOnlyElectronMuon:
   executeDiElectronMuonPath = True
   executeDiMuonPath = False  
   executeDiElectronPath = False
-if sum([options.runOnlyDiMuon,options.runOnlyDiElectron,options.runOnlyElectronMuon]) > 1:
+if options.runALLpaths:
+  executeDiElectronMuonPath = True
+  executeDiMuonPath = True
+  executeDiElectronPath = True
+
+if sum([options.runOnlyDiMuon,options.runOnlyDiElectron,options.runOnlyElectronMuon,options.runALLpaths]) > 1:
   sys.exit('only one path can be the only')
 
 reRunRange = re.match('^([0-9]+)-([0-9]+)$',options.runRange)
