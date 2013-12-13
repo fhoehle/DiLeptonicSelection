@@ -2,6 +2,7 @@ import ROOT,sys,os,argparse
 sys.path.append(os.getenv('HOME')+'/PyRoot_Helpers/PyRoot_Functions')
 sys.path.append(os.getenv('CMSSW_BASE')+"/MyCMSSWAnalysisTools/Tools")
 import tools
+import coreTools
 import MyHistFunctions_cfi as MyHistFunctions
 import json
 parser = argparse.ArgumentParser()
@@ -37,7 +38,7 @@ def readJson(dS , jsonFileName,debug=False):
 ROOT.gROOT.SetStyle("Plain")
 ####################
 plotFolder = "plots" 
-plotFolder += "_"+tools.getTimeStamp()
+plotFolder += "_"+coreTools.getTimeStamp()
 plotFolder = plotFolder if plotFolder.startswith('/') else os.getenv('PWD')+os.path.sep+plotFolder
 os.makedirs(plotFolder)
 print plotFolder
