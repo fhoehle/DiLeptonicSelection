@@ -21,11 +21,11 @@ triggersUsedForAnalysis = {
   ,'electronMuon':{}
 }
 electronMuonDataUseTriggers = {'HLT_Mu8_Ele17_CaloIdL_v*':[0,167913],'HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v*':[167914,999999],'HLT_Mu17_Ele8_CaloIdL_v*':[0,175972] ,'HLT_Mu17_Ele8_CaloIdT_CaloIsoVL-v*':[175973,999999]}
-triggersUsedForAnalysis['electronMuon']['data'] = electronMuonDataUseTriggers; triggersUsedForAnalysis['electronMuon']['mc']='HLT_Mu10_Ele10_CaloIdL_v3 OR HLT_Mu8_Ele17_CaloIdL_v2'
+triggersUsedForAnalysis['electronMuon']['data'] = electronMuonDataUseTriggers; triggersUsedForAnalysis['electronMuon']['mc']="HLT_Mu17_Ele8_CaloIdL_v9 OR HLT_Mu8_Ele17_CaloIdL_v9"#'HLT_Mu10_Ele10_CaloIdL_v3 OR HLT_Mu8_Ele17_CaloIdL_v2'
 diElectronDataUseTriggers = {'HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v*':[0,170901],'HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*':[170902,999999]}
-triggersUsedForAnalysis['diElectron']['data']=diElectronDataUseTriggers; triggersUsedForAnalysis['diElectron']['mc']="HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2"
+triggersUsedForAnalysis['diElectron']['data']=diElectronDataUseTriggers; triggersUsedForAnalysis['diElectron']['mc']="HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v8" #HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2"
 diMuonDataUseTriggers = {'HLT_DoubleMu7_v*':[0,165208],'HLT_Mu13_Mu8_v*':[165209,178419],'HLT_Mu17_Mu8_v* OR HLT_Mu17_TkMu8_v*':[178420,999999]}
-triggersUsedForAnalysis['diMuon']['data'] =diMuonDataUseTriggers; triggersUsedForAnalysis['diMuon']['mc']= "HLT_DoubleMu6_v1"
+triggersUsedForAnalysis['diMuon']['data'] =diMuonDataUseTriggers; triggersUsedForAnalysis['diMuon']['mc']= "HLT_DoubleMu6_v8" #HLT_DoubleMu6_v1"
 
 import imp,os,sys,re
 executeDiElectronPath = False
@@ -544,7 +544,7 @@ dbHist = cms.PSet( min = cms.untracked.double(0), max = cms.untracked.double(1),
 #muons
 myMuonCuts = {"cuts":[{'label':'isTrackerMuon','cut':'isTrackerMuon',"hist":boolHist},{'label':'isGlobalMuon','cut':'isGlobalMuon',"hist":boolHist,"not":['globalTrackHitPatValHits','globalTrackNormalizedChi2','globalTrackHitPatValHits']},{'label':'globalTrackNormalizedChi2','cut':'globalTrack.normalizedChi2 < 10.','hist':chi2Hist},{'label':'innerTrackValHits','cut':'innerTrack.numberOfValidHits > 10','hist':chi2Hist},{'label':'globalTrackHitPatValHits','cut':'globalTrack.hitPattern.numberOfValidMuonHits > 0','hist':chi2Hist},{'label':'absEta','cut':'abs(eta) < 2.4','hist':etaHist},{'label':'pt','cut':'pt > 20.','hist':ptHist},{'label':'dB','cut':'abs(dB) < 0.02','hist':dbHist},{'label':'relIso','cut':'(neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20','hist':relIsoHist}],"coll":"patMuonsPF"}
 finalCut=createCut(myMuonCuts["cuts"])
-doMuonN1 = True #False
+doMuonN1 = False
 import copy,re
 if doMuonN1:
   process.pPFN1 = cms.Path(pPF._seq)
@@ -560,7 +560,7 @@ if doMuonN1:
     tmpMuonN1Coll = cms.EDFilter("PATMuonSelector", src = cms.InputTag(myMuonCuts["coll"]),cut = cms.string(tmpCutList)  )
     tmpMuonN1CollName = tmpMuonN1Coll.src.value() +'NM1'+cut["label"]
     setattr(process,tmpMuonN1CollName,tmpMuonN1Coll); pPFN1Tmp += getattr(process,tmpMuonN1CollName)
-    tmpMuonN1CollFilter = countPatMuons = cms.EDFilter("PATCandViewCountFilter", minNumber = cms.uint32(2),maxNumber = cms.uint32(999999), src = cms.InputTag(tmpMuonN1CollName)); setattr(process,tmpMuonN1CollName+"CountFilter",tmpMuonN1CollFilter);  pPFN1Tmp += getattr(process,tmpMuonN1CollName+"CountFilter")
+    tmpMuonN1CollFilter = cms.EDFilter("PATCandViewCountFilter", minNumber = cms.uint32(2),maxNumber = cms.uint32(999999), src = cms.InputTag(tmpMuonN1CollName)); setattr(process,tmpMuonN1CollName+"CountFilter",tmpMuonN1CollFilter);  pPFN1Tmp += getattr(process,tmpMuonN1CollName+"CountFilter")
     reCut = re.match('^\ *([^<>=]*)\ *[<>=]*[=]*\ *[^<>=]*$',cut["cut"]).group(1)
     print reCut
     tmpHist = copy.deepcopy(cut["hist"]);setattr(tmpHist,'name',cms.untracked.string(cut["label"]));setattr(tmpHist,'description',cms.untracked.string(cut["label"]));setattr(tmpHist,'plotquantity',cms.untracked.string(reCut));tmpHist.lazyParsing = cms.untracked.bool(True)
@@ -612,7 +612,7 @@ if executeDiMuonPath:
   else:
     diMuontrigger=triggers['mc']
   myMuonPath = diMuon_cfg.myMuonPath(options.runOnData,diMuontrigger)
-  myMuonPath.doDiMuonPath(process,pPF,True)
+  myMuonPath.doDiMuonPath(process,pPF,debugIt)
 #DI Electron Signal
 #executeDiElectronPath = True
 if executeDiElectronPath:
@@ -627,7 +627,7 @@ if executeDiElectronPath:
   else:
     diElectrontrigger = triggers['mc']
   myElectronPath = diElectron_cfg.myElectronPath(options.runOnData,diElectrontrigger)
-  myElectronPath.doDiElectronPath(process,pPF,True)
+  myElectronPath.doDiElectronPath(process,pPF,debugIt)
   ## my electron selection
 # Di EMu Signal
 if executeDiElectronMuonPath: 
@@ -642,7 +642,7 @@ if executeDiElectronMuonPath:
   else:
     electronMuontrigger = triggers['mc']
   myElectronMuonPath = diEleMuon_cfg.myElectronMuonPath(options.runOnData,electronMuontrigger)
-  myElectronMuonPath.doDiEleMuonPath(process,pPF,True)
+  myElectronMuonPath.doDiEleMuonPath(process,pPF,debugIt)
   ##DiElectronMuon
 
 ## pPF configuration continues ...
