@@ -54,6 +54,7 @@ options.register('runOnlyDiElectron',False,VarParsing.multiplicity.singleton,Var
 options.register('runOnlyElectronMuon',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run only electron muon path')
 options.register('runALLpaths',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run all three paths')
 options.register('noEDMOutput',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'no EDM output')
+options.register('keepOnlyTriggerPathResults',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'keep only the trigger path results')
 print "args ",sys.argv
 options.parseArguments()
 print "these options where given",options.__dict__['_setDuringParsing']
@@ -683,5 +684,7 @@ if options.runOnTTbar:
    else:
      process.pPFN1.replace(process.myttbarGenEvent10Parts,process.myttbarGenEvent10Parts*process.diLepMcFilter)
 ###
+if options.keepOnlyTriggerPathResults:
+  process.out.outputCommands = cms.untracked.vstring('drop *','keep *_TriggerResults_*_*') 
 if options.noEDMOutput:
   process.outpath = cms.EndPath()
