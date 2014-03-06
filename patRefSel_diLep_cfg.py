@@ -46,7 +46,6 @@ options.register ('eventsToProcess',
                    "Events to process")
 options.register('skipEvents',0,VarParsing.multiplicity.singleton,VarParsing.varType.int,'skipEvents')
 options.register('runOnTTbar',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'runOnTTbar')
-options.register('N1TTbarDiLepBck',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'N1TTbarDiLepBck')
 options.register('runOnData',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'runOnData')
 options.register('runRange','',VarParsing.multiplicity.singleton,VarParsing.varType.string,'runRange used for running on data to estimate trigger')
 options.register('runOnlyDiMuon',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run only di muon path')
@@ -100,7 +99,7 @@ process = cms.Process( 'PAT' )
 print "this is cmsRun input: ",sys.argv
 
 ### Data or MC?
-runOnMC = True
+runOnMC = not options.runOnData
 
 ### Reference selection
 
@@ -678,8 +677,6 @@ process.MessageLogger.myDebugFile = cms.untracked.PSet(threshold = cms.untracked
 #process.addMyBTagWeights = cms.EDProducer("AddMyBTagWeights"); process.simpleProd += process.addMyBTagWeights
 process.out.SelectEvents.SelectEvents.append( 'simpleProd' )
 # Compute the mean pt per unit area (rho) from the
-if options.N1TTbarDiLepBck:
-  options.runOnTTbar = True
 if options.runOnTTbar:
   print "attention using genMC ttbar di lep cut"
   process.myttbarGenEvent10Parts = cms.EDProducer('MyTTbarGenEvent10Parts')
@@ -689,11 +686,6 @@ if options.runOnTTbar:
   #if options.filterSignal:
   print "tagging di lep signal"
   process.isDiLepPath = cms.Path(process.myttbarGenEvent10Parts*process.diLepMcFilter)
-#  if options.doNM1:
-#   if options.N1TTbarDiLepBck:
-#     process.pPFN1muon.replace(process.myttbarGenEvent10Parts,process.myttbarGenEvent10Parts*~process.diLepMcFilter)
-#   else:
-#     process.pPFN1muon.replace(process.myttbarGenEvent10Parts,process.myttbarGenEvent10Parts*process.diLepMcFilter)
 ###
 if options.keepOnlyTriggerPathResults:
   process.out.outputCommands = cms.untracked.vstring('drop *','keep *_TriggerResults_*_*') 
