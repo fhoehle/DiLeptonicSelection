@@ -545,30 +545,41 @@ relIsoHist = cms.PSet( min = cms.untracked.double(0), max = cms.untracked.double
 dbHist = cms.PSet( min = cms.untracked.double(0), max = cms.untracked.double(1), nbins = cms.untracked.int32(200))
 #, name = cms.untracked.string('JetPt'), description  = cms.untracked.string(''), plotquantity = cms.untracked.string(   'pt'))
 #muons
-myMuonCuts = {"cuts":[{'label':'isTrackerMuon','cut':'isTrackerMuon',"hist":boolHist},{'label':'isGlobalMuon','cut':'isGlobalMuon',"hist":boolHist,"not":['globalTrackHitPatValHits','globalTrackNormalizedChi2','globalTrackHitPatValHits']},{'label':'globalTrackNormalizedChi2','cut':'globalTrack.normalizedChi2 < 10.','hist':chi2Hist},{'label':'innerTrackValHits','cut':'innerTrack.numberOfValidHits > 10','hist':chi2Hist},{'label':'globalTrackHitPatValHits','cut':'globalTrack.hitPattern.numberOfValidMuonHits > 0','hist':chi2Hist},{'label':'absEta','cut':'abs(eta) < 2.4','hist':etaHist},{'label':'pt','cut':'pt > 20.','hist':ptHist},{'label':'dB','cut':'abs(dB) < 0.02','hist':dbHist},{'label':'relIso','cut':'(neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20','hist':relIsoHist}],"coll":"patMuonsPF"}
+myMuonCuts = {"cuts":[{'label':'isTrackerMuon','cut':'isTrackerMuon',"hist":boolHist}
+  ,{'label':'isGlobalMuon','cut':'isGlobalMuon',"hist":boolHist,"not":['globalTrackHitPatValHits','globalTrackNormalizedChi2','globalTrackHitPatValHits']}
+  ,{'label':'globalTrackNormalizedChi2','cut':'globalTrack.normalizedChi2 < 10.','hist':chi2Hist}
+  ,{'label':'innerTrackValHits','cut':'innerTrack.numberOfValidHits > 10','hist':chi2Hist}
+  ,{'label':'globalTrackHitPatValHits','cut':'globalTrack.hitPattern.numberOfValidMuonHits > 0','hist':chi2Hist}
+  ,{'label':'absEta','cut':'abs(eta) < 2.4','hist':etaHist}
+  ,{'label':'pt','cut':'pt > 20.','hist':ptHist}
+  ,{'label':'dB','cut':'abs(dB) < 0.02','hist':dbHist}
+  ,{'label':'relIso','cut':'(neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20','hist':relIsoHist}]
+  ,"coll":"patMuonsPF"}
 finalCut=createCut(myMuonCuts["cuts"])
 import copy,re
-if options.doNM1:
-  process.pPFN1 = cms.Path(pPF._seq)
-  cutsList =  myMuonCuts["cuts"]
-  for i,cut in enumerate(cutsList):
-    pPFN1Tmp = cms.Path(pPF._seq)
+
+def createNminus1Paths (process,p,cutList,collection,label=''):
+  for i,cut in enumerate(cutList):
+    pNM1Tmp = cms.Path(p._seq)
     print "contructiong for ",cut,"  ",i
-    tmpCutList = cutsList[:i]+cutsList[i+1:]
+    tmpCutList = cutList[:i]+cutList[i+1:]
     if cut.has_key("not"):
-      tmpCutList = [c for c in cutsList[:i]+cutsList[i+1:] if not c["label"] in cut["not"]] 
+      tmpCutList = [c for c in cutList[:i]+cutList[i+1:] if not c["label"] in cut["not"]] 
     tmpCutList=createCut(tmpCutList)
     print tmpCutList
-    tmpMuonN1Coll = cms.EDFilter("PATMuonSelector", src = cms.InputTag(myMuonCuts["coll"]),cut = cms.string(tmpCutList)  )
-    tmpMuonN1CollName = tmpMuonN1Coll.src.value() +'NM1'+cut["label"]
-    setattr(process,tmpMuonN1CollName,tmpMuonN1Coll); pPFN1Tmp += getattr(process,tmpMuonN1CollName)
-    tmpMuonN1CollFilter = cms.EDFilter("PATCandViewCountFilter", minNumber = cms.uint32(2),maxNumber = cms.uint32(999999), src = cms.InputTag(tmpMuonN1CollName)); setattr(process,tmpMuonN1CollName+"CountFilter",tmpMuonN1CollFilter);  pPFN1Tmp += getattr(process,tmpMuonN1CollName+"CountFilter")
+    tmpNM1Coll = cms.EDFilter("CandViewSelector", src = cms.InputTag(collection),cut = cms.string(tmpCutList) ,lazyParsing = cms.untracked.bool(True) )
+    tmpNM1CollName = tmpNM1Coll.src.value()+label+'NM1'+cut["label"]
+    setattr(process,tmpNM1CollName,tmpNM1Coll); pNM1Tmp += getattr(process,tmpNM1CollName)
+    tmpNM1CollFilter = cms.EDFilter("CandViewCountFilter", minNumber = cms.uint32(2),maxNumber = cms.uint32(999999), src = cms.InputTag(tmpNM1CollName),lazyParsing = cms.untracked.bool(True)); setattr(process,tmpNM1CollName+"CountFilter",tmpNM1CollFilter);  pNM1Tmp += getattr(process,tmpNM1CollName+"CountFilter")
     reCut = re.match('^\ *([^<>=]*)\ *[<>=]*[=]*\ *[^<>=]*$',cut["cut"]).group(1)
     print reCut
     tmpHist = copy.deepcopy(cut["hist"]);setattr(tmpHist,'name',cms.untracked.string(cut["label"]));setattr(tmpHist,'description',cms.untracked.string(cut["label"]));setattr(tmpHist,'plotquantity',cms.untracked.string(reCut));tmpHist.lazyParsing = cms.untracked.bool(True)
-    tmpMuonN1Histo = cms.EDAnalyzer('CandViewHistoAnalyzer', src = cms.InputTag(tmpMuonN1CollName),histograms = cms.VPSet(tmpHist))
-    setattr(process, tmpMuonN1CollName+"N1Histo" ,tmpMuonN1Histo); pPFN1Tmp += getattr(process,tmpMuonN1CollName+"N1Histo")
-    setattr(process, 'pPFNM1'+cut["label"],pPFN1Tmp)
+    tmpNM1Histo = cms.EDAnalyzer('CandViewHistoAnalyzer', src = cms.InputTag(tmpNM1CollName),histograms = cms.VPSet(tmpHist))
+    setattr(process, tmpNM1CollName+"NM1Histo" ,tmpNM1Histo); pNM1Tmp += getattr(process,tmpNM1CollName+"NM1Histo")
+    setattr(process, tmpNM1CollName+'pNM1',pNM1Tmp)
+
+if options.doNM1:
+  createNminus1Paths(process,pPF,myMuonCuts["cuts"],myMuonCuts["coll"])
     
 process.mySelectedPatMuons = cms.EDFilter("PATMuonSelector", src = cms.InputTag("patMuonsPF"),
   #cut = cms.string('isTrackerMuon && isGlobalMuon && globalTrack.normalizedChi2 < 10. && innerTrack.numberOfValidHits > 10 && globalTrack.hitPattern.numberOfValidMuonHits > 0 && abs(eta) < 2.4 && pt > 20. && abs(dB) < 0.02 && (neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20') 
@@ -678,11 +689,11 @@ if options.runOnTTbar:
   #if options.filterSignal:
   print "tagging di lep signal"
   process.isDiLepPath = cms.Path(process.myttbarGenEvent10Parts*process.diLepMcFilter)
-  if options.doNM1:
-   if options.N1TTbarDiLepBck:
-     process.pPFN1.replace(process.myttbarGenEvent10Parts,process.myttbarGenEvent10Parts*~process.diLepMcFilter)
-   else:
-     process.pPFN1.replace(process.myttbarGenEvent10Parts,process.myttbarGenEvent10Parts*process.diLepMcFilter)
+#  if options.doNM1:
+#   if options.N1TTbarDiLepBck:
+#     process.pPFN1muon.replace(process.myttbarGenEvent10Parts,process.myttbarGenEvent10Parts*~process.diLepMcFilter)
+#   else:
+#     process.pPFN1muon.replace(process.myttbarGenEvent10Parts,process.myttbarGenEvent10Parts*process.diLepMcFilter)
 ###
 if options.keepOnlyTriggerPathResults:
   process.out.outputCommands = cms.untracked.vstring('drop *','keep *_TriggerResults_*_*') 
