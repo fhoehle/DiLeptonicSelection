@@ -55,6 +55,7 @@ options.register('runOnlyElectronMuon',False,VarParsing.multiplicity.singleton,V
 options.register('runALLpaths',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run all three paths')
 options.register('noEDMOutput',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'no EDM output')
 options.register('keepOnlyTriggerPathResults',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'keep only the trigger path results')
++options.register('doNM1',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'do N minus 1 plots')
 print "args ",sys.argv
 options.parseArguments()
 print "these options where given",options.__dict__['_setDuringParsing']
@@ -546,9 +547,8 @@ dbHist = cms.PSet( min = cms.untracked.double(0), max = cms.untracked.double(1),
 #muons
 myMuonCuts = {"cuts":[{'label':'isTrackerMuon','cut':'isTrackerMuon',"hist":boolHist},{'label':'isGlobalMuon','cut':'isGlobalMuon',"hist":boolHist,"not":['globalTrackHitPatValHits','globalTrackNormalizedChi2','globalTrackHitPatValHits']},{'label':'globalTrackNormalizedChi2','cut':'globalTrack.normalizedChi2 < 10.','hist':chi2Hist},{'label':'innerTrackValHits','cut':'innerTrack.numberOfValidHits > 10','hist':chi2Hist},{'label':'globalTrackHitPatValHits','cut':'globalTrack.hitPattern.numberOfValidMuonHits > 0','hist':chi2Hist},{'label':'absEta','cut':'abs(eta) < 2.4','hist':etaHist},{'label':'pt','cut':'pt > 20.','hist':ptHist},{'label':'dB','cut':'abs(dB) < 0.02','hist':dbHist},{'label':'relIso','cut':'(neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20','hist':relIsoHist}],"coll":"patMuonsPF"}
 finalCut=createCut(myMuonCuts["cuts"])
-doMuonN1 = False
 import copy,re
-if doMuonN1:
+if options.doNM1:
   process.pPFN1 = cms.Path(pPF._seq)
   cutsList =  myMuonCuts["cuts"]
   for i,cut in enumerate(cutsList):
@@ -678,7 +678,7 @@ if options.runOnTTbar:
   #if options.filterSignal:
   print "tagging di lep signal"
   process.isDiLepPath = cms.Path(process.myttbarGenEvent10Parts*process.diLepMcFilter)
-  if doMuonN1:
+  if options.doNM1:
    if options.N1TTbarDiLepBck:
      process.pPFN1.replace(process.myttbarGenEvent10Parts,process.myttbarGenEvent10Parts*~process.diLepMcFilter)
    else:
