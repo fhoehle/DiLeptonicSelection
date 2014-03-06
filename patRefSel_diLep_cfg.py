@@ -545,14 +545,23 @@ relIsoHist = cms.PSet( min = cms.untracked.double(0), max = cms.untracked.double
 dbHist = cms.PSet( min = cms.untracked.double(0), max = cms.untracked.double(1), nbins = cms.untracked.int32(200))
 #, name = cms.untracked.string('JetPt'), description  = cms.untracked.string(''), plotquantity = cms.untracked.string(   'pt'))
 #muons
-myMuonCuts = {"cuts":[{'label':'isTrackerMuon','cut':'isTrackerMuon',"hist":boolHist},{'label':'isGlobalMuon','cut':'isGlobalMuon',"hist":boolHist,"not":['globalTrackHitPatValHits','globalTrackNormalizedChi2','globalTrackHitPatValHits']},{'label':'globalTrackNormalizedChi2','cut':'globalTrack.normalizedChi2 < 10.','hist':chi2Hist},{'label':'innerTrackValHits','cut':'innerTrack.numberOfValidHits > 10','hist':chi2Hist},{'label':'globalTrackHitPatValHits','cut':'globalTrack.hitPattern.numberOfValidMuonHits > 0','hist':chi2Hist},{'label':'absEta','cut':'abs(eta) < 2.4','hist':etaHist},{'label':'pt','cut':'pt > 20.','hist':ptHist},{'label':'dB','cut':'abs(dB) < 0.02','hist':dbHist},{'label':'relIso','cut':'(neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20','hist':relIsoHist}],"coll":"patMuonsPF"}
+myMuonCuts = {"cuts":[{'label':'isTrackerMuon','cut':'isTrackerMuon',"hist":boolHist}
+  ,{'label':'isGlobalMuon','cut':'isGlobalMuon',"hist":boolHist,"not":['globalTrackHitPatValHits','globalTrackNormalizedChi2','globalTrackHitPatValHits']}
+  ,{'label':'globalTrackNormalizedChi2','cut':'globalTrack.normalizedChi2 < 10.','hist':chi2Hist}
+  ,{'label':'innerTrackValHits','cut':'innerTrack.numberOfValidHits > 10','hist':chi2Hist}
+  ,{'label':'globalTrackHitPatValHits','cut':'globalTrack.hitPattern.numberOfValidMuonHits > 0','hist':chi2Hist}
+  ,{'label':'absEta','cut':'abs(eta) < 2.4','hist':etaHist}
+  ,{'label':'pt','cut':'pt > 20.','hist':ptHist}
+  ,{'label':'dB','cut':'abs(dB) < 0.02','hist':dbHist}
+  ,{'label':'relIso','cut':'(neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20','hist':relIsoHist}]
+  ,"coll":"patMuonsPF"}
 finalCut=createCut(myMuonCuts["cuts"])
 import copy,re
 if options.doNM1:
   process.pPFN1muon = cms.Path(pPF._seq)
   cutsList =  myMuonCuts["cuts"]
 
-def createNminus1Paths (process,p,cutList,collectioni,label=''):
+def createNminus1Paths (process,p,cutList,collection,label=''):
   for i,cut in enumerate(cutList):
     pNM1Tmp = cms.Path(p._seq)
     print "contructiong for ",cut,"  ",i
@@ -568,9 +577,9 @@ def createNminus1Paths (process,p,cutList,collectioni,label=''):
     reCut = re.match('^\ *([^<>=]*)\ *[<>=]*[=]*\ *[^<>=]*$',cut["cut"]).group(1)
     print reCut
     tmpHist = copy.deepcopy(cut["hist"]);setattr(tmpHist,'name',cms.untracked.string(cut["label"]));setattr(tmpHist,'description',cms.untracked.string(cut["label"]));setattr(tmpHist,'plotquantity',cms.untracked.string(reCut));tmpHist.lazyParsing = cms.untracked.bool(True)
-    tmpNM1Histo = cms.EDAnalyzer('CandViewHistoAnalyzer', src = cms.InputTag(tmpMuonN1CollName),histograms = cms.VPSet(tmpHist))
-    setattr(process, tmpNM1CollName+"N1Histo" ,tmpNM1Histo); pNM1Tmp += getattr(process,tmpNM1CollName+"NM1Histo")
-    setattr(process, tmpNM1CollNamepNM1+'pNM1',pNM1Tmp)
+    tmpNM1Histo = cms.EDAnalyzer('CandViewHistoAnalyzer', src = cms.InputTag(tmpNM1CollName),histograms = cms.VPSet(tmpHist))
+    setattr(process, tmpNM1CollName+"NM1Histo" ,tmpNM1Histo); pNM1Tmp += getattr(process,tmpNM1CollName+"NM1Histo")
+    setattr(process, tmpNM1CollName+'pNM1',pNM1Tmp)
 
 createNminus1Paths(process,pPF,myMuonCuts["cuts"],myMuonCuts["coll"])
     
