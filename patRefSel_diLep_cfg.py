@@ -545,14 +545,14 @@ dbHist = cms.PSet( min = cms.untracked.double(0), max = cms.untracked.double(1),
 #, name = cms.untracked.string('JetPt'), description  = cms.untracked.string(''), plotquantity = cms.untracked.string(   'pt'))
 #muons
 myMuonCuts = {"cuts":[{'label':'isTrackerMuon','cut':'isTrackerMuon',"hist":boolHist}
-  ,{'label':'isGlobalMuon','cut':'isGlobalMuon',"hist":boolHist,"not":['globalTrackHitPatValHits','globalTrackNormalizedChi2','globalTrackHitPatValHits']}
-  ,{'label':'globalTrackNormalizedChi2','cut':'globalTrack.normalizedChi2 < 10.','hist':chi2Hist}
-  ,{'label':'innerTrackValHits','cut':'innerTrack.numberOfValidHits > 10','hist':chi2Hist}
-  ,{'label':'globalTrackHitPatValHits','cut':'globalTrack.hitPattern.numberOfValidMuonHits > 0','hist':chi2Hist}
-  ,{'label':'absEta','cut':'abs(eta) < 2.4','hist':etaHist}
-  ,{'label':'pt','cut':'pt > 20.','hist':ptHist}
-  ,{'label':'dB','cut':'abs(dB) < 0.02','hist':dbHist}
-  ,{'label':'relIso','cut':'(neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20','hist':relIsoHist}]
+    ,{'label':'isGlobalMuon','cut':'isGlobalMuon',"hist":boolHist,"not":['globalTrackHitPatValHits','globalTrackNormalizedChi2','globalTrackHitPatValHits']}
+    ,{'label':'globalTrackNormalizedChi2','cut':'globalTrack.normalizedChi2 < 10.','hist':chi2Hist}
+    ,{'label':'innerTrackValHits','cut':'innerTrack.numberOfValidHits > 10','hist':chi2Hist}
+    ,{'label':'globalTrackHitPatValHits','cut':'globalTrack.hitPattern.numberOfValidMuonHits > 0','hist':chi2Hist}
+    ,{'label':'absEta','cut':'abs(eta) < 2.4','hist':etaHist}
+    ,{'label':'pt','cut':'pt > 20.','hist':ptHist}
+    ,{'label':'dB','cut':'abs(dB) < 0.02','hist':dbHist}
+    ,{'label':'relIso','cut':'(neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20','hist':relIsoHist}]
   ,"coll":"patMuonsPF"}
 finalCut=createCut(myMuonCuts["cuts"])
 import copy,re
@@ -581,8 +581,7 @@ if options.doNM1:
   createNminus1Paths(process,pPF,myMuonCuts["cuts"],myMuonCuts["coll"])
     
 process.mySelectedPatMuons = cms.EDFilter("PATMuonSelector", src = cms.InputTag("patMuonsPF"),
-  #cut = cms.string('isTrackerMuon && isGlobalMuon && globalTrack.normalizedChi2 < 10. && innerTrack.numberOfValidHits > 10 && globalTrack.hitPattern.numberOfValidMuonHits > 0 && abs(eta) < 2.4 && pt > 20. && abs(dB) < 0.02 && (neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20') 
-   cut = cms.string(finalCut)
+   cut = cms.string(createCut(myMuonCuts["cuts"]))
   )
 process.mySelectedPatMuons2p1 =cms.EDFilter("PATMuonSelector", src = cms.InputTag("mySelectedPatMuons"), cut = cms.string('abs(eta) < 2.1' )  )
 pPF += process.mySelectedPatMuons; pPF += process.mySelectedPatMuons2p1 
