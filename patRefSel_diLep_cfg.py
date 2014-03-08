@@ -601,9 +601,22 @@ process.myIntermediateElectrons = cms.EDProducer("PATElectronCleaner", src = cms
     ),
     finalCut = cms.string(''),# finalCut (any string-based cut for pat::Muon)
   );pPF += process.myIntermediateElectrons 
-process.mySelectedPatElectrons = cms.EDFilter("PATElectronSelector", src = cms.InputTag("myIntermediateElectrons"),
-      	  cut = cms.string('pt > 20. && abs(eta) < 2.5 && gsfTrack.trackerExpectedHitsInner.numberOfLostHits < 2 && !(abs(userFloat("deltaCotTheta")) < 0.02 && abs(userFloat("deltaDistance")) < 0.02 )  && test_bit(electronID("simpleEleId90cIso"), 0) && (neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.17 && abs(dB) < 0.04 && ecalDrivenSeed && !hasOverlaps("muonsTrkOrGl")')#&& gsfTrack->trackerExpectedHitsInner().numberOfLostHits() < 2 &&test_bit(electronID("simpleEleId90cIso"), 0)')
+
+myElectronCuts = {"cuts":[{'label':'pt','cut':'pt > 20.',"hist":ptHist}
+    ,{'label':'numberHitsLostInnerTracker','cut':'gsfTrack.trackerExpectedHitsInner.numberOfLostHits < 2',"hist":chi2Hist}
+    ,{'label':'deltaCotThetaAndDeltaDistance','cut':'!(abs(userFloat("deltaCotTheta")) < 0.02 && abs(userFloat("deltaDistance")) < 0.02 )','hist':boolHist}
+    ,{'label':'overLapMuons','cut':' !hasOverlaps("muonsTrkOrGl")','hist':boolHist}
+    ,{'label':'absEta','cut':'abs(eta) < 2.5','hist':etaHist}
+    ,{'label':'ecalSeed','cut':'ecalDrivenSeed','hist':boolHist}
+    ,{'label':'dB','cut':'abs(dB) < 0.04','hist':dbHist}
+    ,{'label':'simpleEleId90cIso','cut':'test_bit(electronID("simpleEleId90cIso"), 0)','hist':boolHist}
+    ,{'label':'relIso','cut':'(neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.17','hist':relIsoHist}]
+  ,"coll":"myIntermediateElectrons"}
+
+process.mySelectedPatElectrons = cms.EDFilter("PATElectronSelector", src = cms.InputTag(myElectronCuts["coll"]),
+      	  cut = cms.string(createCut(myElectronCuts["cuts"]))
 )
+
 pPF += process.mySelectedPatElectrons; pPF += process.cleanPatJetsPF
 process.addBTagWeights = cms.EDProducer("AddMyBTagWeights",jetSrc = cms.InputTag("cleanPatJetsPF")); pPF += process.addBTagWeights
 #
