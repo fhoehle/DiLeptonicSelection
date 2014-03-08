@@ -45,7 +45,7 @@ options.register ('eventsToProcess',
                    VarParsing.varType.string,
                    "Events to process")
 options.register('skipEvents',0,VarParsing.multiplicity.singleton,VarParsing.varType.int,'skipEvents')
-options.register('runOnTTbar',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'runOnTTbar')
+options.register('runOnTTbar',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'just tag events')
 options.register('runOnData',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'runOnData')
 options.register('runRange','',VarParsing.multiplicity.singleton,VarParsing.varType.string,'runRange used for running on data to estimate trigger')
 options.register('runOnlyDiMuon',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run only di muon path')
@@ -55,6 +55,8 @@ options.register('runALLpaths',False,VarParsing.multiplicity.singleton,VarParsin
 options.register('noEDMOutput',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'no EDM output')
 options.register('keepOnlyTriggerPathResults',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'keep only the trigger path results')
 options.register('doNM1',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'do N minus 1 plots')
+options.register('selectSignal',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'select only ttbar dileptonic (e mu) events')
+options.register('selectBkg',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'select only ttbar non dileptonic (e mu) events')
 print "args ",sys.argv
 options.parseArguments()
 print "these options where given",options.__dict__['_setDuringParsing']
@@ -692,10 +694,16 @@ process.out.SelectEvents.SelectEvents.append( 'simpleProd' )
 if options.runOnTTbar:
   print "attention using genMC ttbar di lep cut"
   process.myttbarGenEvent10Parts = cms.EDProducer('MyTTbarGenEvent10Parts')
-  for pName in process.paths.keys():
-    getattr(process,pName).insert(0,process.myttbarGenEvent10Parts)
   process.diLepMcFilter = cms.EDFilter('DiLepMcFilter', ttbarEventTag = cms.untracked.InputTag("myttbarGenEvent10Parts")    )
-  #if options.filterSignal:
+  if options.selectSignal  and options.selectBkg:
+    sys.exit("selectSignal  True and selectBkg True is not possible!!")
+  for pName in process.paths.keys():
+    pTmp = getattr(process,pName)
+    getattr(process,pName).insert(0,process.myttbarGenEvent10Parts)
+    if options.selectSignal:
+      pTmp.replace(process.myttbarGenEvent10Parts ,process.myttbarGenEvent10Parts * process.diLepMcFilter)
+    if options.selectBkg:
+      pTmp.replace(process.myttbarGenEvent10Parts ,process.myttbarGenEvent10Parts * ~process.diLepMcFilter) 
   print "tagging di lep signal"
   process.isDiLepPath = cms.Path(process.myttbarGenEvent10Parts*process.diLepMcFilter)
 ###
