@@ -676,8 +676,9 @@ if executeDiElectronMuonPath:
 if options.outputFile != str('output.root'):
  print "the outputfile ",options.outputFile
  process.out.fileName = options.outputFile
-process.out.outputCommands = cms.untracked.vstring('keep *_*_*_'+process.name_(),'keep  *_addPileupInfo_*_*', 'keep *_generator_*_*','keep *_addBTagWeights_*_*','keep *_addPileupInfo_*_*' )
-
+tobeKept=['cleanJetsDiMuon','DiLepCandMuons','MuonsUsedForDiLepCand','DiLepCandMuons','mySelectedPatMuons','mySelectedPatMuons2p1','DiMuonmyselectedPatMETs','patMETsPF','cleanPatJetsPF','mySelectedPatElectrons','patMuonsPF','myIntermediateElectrons','patElectronsPF']
+process.out.outputCommands = cms.untracked.vstring(['drop *','keep  *_addPileupInfo_*_*', 'keep *_generator_*_*','keep *_addBTagWeights_*_*','keep *_addPileupInfo_*_*','keep *_TriggerResults_*_*','keep *_addMyPileupInfo_*_* ','keep *_myttbarGenEvent10Parts_*_*','keep *_offlinePrimaryVertices_*_*']+['keep *_'+coll+'_*_*' for coll in tobeKept ])
+print "fixed path output comamdns"
 # simple production
 process.simpleProd = cms.Path()
 if not options.runOnData:
