@@ -57,6 +57,7 @@ options.register('keepOnlyTriggerPathResults',False,VarParsing.multiplicity.sing
 options.register('doNM1',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'do N minus 1 plots')
 options.register('selectSignal',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'select only ttbar dileptonic (e mu) events')
 options.register('selectBkg',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'select only ttbar non dileptonic (e mu) events')
+options.register('debug',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'debugging activated')
 print "args ",sys.argv
 options.parseArguments()
 print "these options where given",options.__dict__['_setDuringParsing']
@@ -482,15 +483,13 @@ process.eidCiCSequence = cms.Sequence(
 + process.eidHyperTight4MC
 )
 
-# The additional sequence
-#patAddOnSequence = cms.Sequence(
-#  getattr( process, 'intermediatePatMuons' + postfix )
-#* getattr( process, 'goodPatJets' + postfix )
-#* getattr( process, 'loosePatMuons' + postfix )
-#* getattr( process, 'tightPatMuons' + postfix )
-#)
-#setattr( process, 'patAddOnSequence' + postfix, patAddOnSequence )
-
+###################
+boolHist = cms.PSet( min = cms.untracked.double(-0.5), max = cms.untracked.double(2.5), nbins = cms.untracked.int32(3))
+chi2Hist = cms.PSet( min = cms.untracked.double(-0.5), max = cms.untracked.double(100.5), nbins = cms.untracked.int32(202))
+etaHist = cms.PSet( min = cms.untracked.double(-5), max = cms.untracked.double(5), nbins = cms.untracked.int32(200))
+ptHist = cms.PSet( min = cms.untracked.double(0), max = cms.untracked.double(200), nbins = cms.untracked.int32(200))
+relIsoHist = cms.PSet( min = cms.untracked.double(0), max = cms.untracked.double(2), nbins = cms.untracked.int32(1000))
+dbHist = cms.PSet( min = cms.untracked.double(0), max = cms.untracked.double(1), nbins = cms.untracked.int32(200))
 # The paths
 pPF = cms.Path()
 pPF += process.goodOfflinePrimaryVertices
@@ -512,7 +511,14 @@ process.kt6PFJetsPF.Rho_EtaMax = cms.double(2.5); process.kt6PFJetsPF.doRhoFastj
 process.kt6PFJetsPF.src = cms.InputTag("particleFlow")
 process.kt6PFJetsPF.doAreaFastjet = False
 process.patJetCorrFactorsPF.primaryVertices = cms.InputTag("offlinePrimaryVertices")
-process.selectedPatJetsPF.cut = cms.string('pt > 30. && abs(eta) < 2.5 && chargedHadronEnergyFraction > 0.0 && chargedEmEnergyFraction < 0.99 && neutralHadronEnergyFraction < 0.99 && neutralEmEnergyFraction < 0.99')
+myJetCuts = {"cuts":[{'label':'chargedHadronEnergyFraction','cut':'chargedHadronEnergyFraction > 0.0',"hist":dbHist}
+    ,{'label':'chargedEmEnergyFraction','cut':'chargedEmEnergyFraction < 0.99','hist':dbHist}
+    ,{'label':'neutralHadronEnergyFraction','cut':'neutralHadronEnergyFraction < 0.99','hist':chi2Hist}
+    ,{'label':'neutralEmEnergyFraction','cut':'neutralEmEnergyFraction < 0.99','hist':chi2Hist}
+    ,{'label':'absEta','cut':'abs(eta) < 2.5','hist':etaHist}
+    ,{'label':'pt','cut':'pt > 30.','hist':ptHist}]
+  ,"coll":"patJetsPF"}
+process.selectedPatJetsPF.cut = cms.string(createCut(myJetCuts["cuts"]))
 process.cleanPatJetsPF.checkOverlaps = cms.PSet(    muons = cms.PSet(src = cms.InputTag("mySelectedPatMuons"),deltaR = cms.double(0.4),
       pairCut = cms.string(''),
       checkRecoComponents = cms.bool(False),
@@ -538,13 +544,6 @@ process.patElectronsPF.electronIDSources.simpleEleId90cIso = cms.InputTag("simpl
 process.patElectronsPF.isolationValues = cms.PSet( pfChargedHadrons = cms.InputTag("elPFIsoValueCharged03PFIdPF"),pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral03PFIdPF"),pfPhotons = cms.InputTag("elPFIsoValueGamma03PFIdPF"))
 process.AddAdditionalElecConvInfoProducer = cms.EDProducer("AddAdditionalElecConvInfoProducer",eleSrc = cms.InputTag("patElectronsPF"));pPF +=process.AddAdditionalElecConvInfoProducer
 ## object definition
-boolHist = cms.PSet( min = cms.untracked.double(-0.5), max = cms.untracked.double(2.5), nbins = cms.untracked.int32(3))
-chi2Hist = cms.PSet( min = cms.untracked.double(-0.5), max = cms.untracked.double(100.5), nbins = cms.untracked.int32(202))
-etaHist = cms.PSet( min = cms.untracked.double(-5), max = cms.untracked.double(5), nbins = cms.untracked.int32(200))
-ptHist = cms.PSet( min = cms.untracked.double(0), max = cms.untracked.double(200), nbins = cms.untracked.int32(200))
-relIsoHist = cms.PSet( min = cms.untracked.double(0), max = cms.untracked.double(2), nbins = cms.untracked.int32(1000))
-dbHist = cms.PSet( min = cms.untracked.double(0), max = cms.untracked.double(1), nbins = cms.untracked.int32(200))
-#, name = cms.untracked.string('JetPt'), description  = cms.untracked.string(''), plotquantity = cms.untracked.string(   'pt'))
 #muons
 myMuonCuts = {"cuts":[{'label':'isTrackerMuon','cut':'isTrackerMuon',"hist":boolHist}
     ,{'label':'isGlobalMuon','cut':'isGlobalMuon',"hist":boolHist,"not":['globalTrackHitPatValHits','globalTrackNormalizedChi2','globalTrackHitPatValHits']}
@@ -556,7 +555,6 @@ myMuonCuts = {"cuts":[{'label':'isTrackerMuon','cut':'isTrackerMuon',"hist":bool
     ,{'label':'dB','cut':'abs(dB) < 0.02','hist':dbHist}
     ,{'label':'relIso','cut':'(neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20','hist':relIsoHist}]
   ,"coll":"patMuonsPF"}
-finalCut=createCut(myMuonCuts["cuts"])
 import copy,re
 
 def createNminus1Paths (process,p,cutList,collection,label=''):
@@ -582,7 +580,7 @@ def createNminus1Paths (process,p,cutList,collection,label=''):
 if options.doNM1:
   createNminus1Paths(process,pPF,myMuonCuts["cuts"],myMuonCuts["coll"])
     
-process.mySelectedPatMuons = cms.EDFilter("PATMuonSelector", src = cms.InputTag("patMuonsPF"),
+process.mySelectedPatMuons = cms.EDFilter("PATMuonSelector", src = cms.InputTag(myMuonCuts["coll"]),
    cut = cms.string(createCut(myMuonCuts["cuts"]))
   )
 process.mySelectedPatMuons2p1 =cms.EDFilter("PATMuonSelector", src = cms.InputTag("mySelectedPatMuons"), cut = cms.string('abs(eta) < 2.1' )  )
@@ -601,7 +599,7 @@ process.myIntermediateElectrons = cms.EDProducer("PATElectronCleaner", src = cms
            requireNoOverlaps   = cms.bool(False), # overlaps don't cause the electron to be discared
         )
     ),
-    finalCut = cms.string(''),# finalCut (any string-based cut for pat::Muon)
+    finalCut = cms.string(''),# 
   );pPF += process.myIntermediateElectrons 
 
 myElectronCuts = {"cuts":[{'label':'pt','cut':'pt > 20.',"hist":ptHist}
@@ -621,9 +619,15 @@ process.mySelectedPatElectrons = cms.EDFilter("PATElectronSelector", src = cms.I
 
 pPF += process.mySelectedPatElectrons; pPF += process.cleanPatJetsPF
 process.addBTagWeights = cms.EDProducer("AddMyBTagWeights",jetSrc = cms.InputTag("cleanPatJetsPF")); pPF += process.addBTagWeights
-#
-debugIt = True
-if debugIt:
+############################################################
+#############################################################
+############################################################
+# PAT config has to be done ebfore this point
+############################################################
+#############################################################
+############################################################
+debug = options.debug
+if debug:
  process.TFileService=cms.Service("TFileService",fileName=cms.string('patRefSel_diLep_cfg_debughistos.root'))
 # DI Muon Signal 
 if executeDiMuonPath:
@@ -638,7 +642,7 @@ if executeDiMuonPath:
   else:
     diMuontrigger=triggers['mc']
   myMuonPath = diMuon_cfg.myMuonPath(options.runOnData,diMuontrigger)
-  myMuonPath.doDiMuonPath(process,pPF,debugIt)
+  myMuonPath.doDiMuonPath(process,pPF,debug)
 #DI Electron Signal
 #executeDiElectronPath = True
 if executeDiElectronPath:
@@ -653,7 +657,7 @@ if executeDiElectronPath:
   else:
     diElectrontrigger = triggers['mc']
   myElectronPath = diElectron_cfg.myElectronPath(options.runOnData,diElectrontrigger)
-  myElectronPath.doDiElectronPath(process,pPF,debugIt)
+  myElectronPath.doDiElectronPath(process,pPF,debug)
   ## my electron selection
 # Di EMu Signal
 if executeDiElectronMuonPath: 
@@ -668,7 +672,7 @@ if executeDiElectronMuonPath:
   else:
     electronMuontrigger = triggers['mc']
   myElectronMuonPath = diEleMuon_cfg.myElectronMuonPath(options.runOnData,electronMuontrigger)
-  myElectronMuonPath.doDiEleMuonPath(process,pPF,debugIt)
+  myElectronMuonPath.doDiEleMuonPath(process,pPF,debug)
   ##DiElectronMuon
 
 ## pPF configuration continues ...
@@ -676,7 +680,7 @@ if executeDiElectronMuonPath:
 if options.outputFile != str('output.root'):
  print "the outputfile ",options.outputFile
  process.out.fileName = options.outputFile
-tobeKept=['cleanJetsDiMuon','DiLepCandMuons','MuonsUsedForDiLepCand','DiLepCandMuons','mySelectedPatMuons','mySelectedPatMuons2p1','DiMuonmyselectedPatMETs','patMETsPF','cleanPatJetsPF','mySelectedPatElectrons','patMuonsPF','myIntermediateElectrons','patElectronsPF']
+tobeKept=['cleanJetsDiMuon','DiLepCandMuonsZVeto','MuonsUsedForDiLepCand','DiLepCandMuons','mySelectedPatMuons','mySelectedPatMuons2p1','DiMuonmyselectedPatMETs','patMETsPF','cleanPatJetsPF','mySelectedPatElectrons','patMuonsPF','myIntermediateElectrons','patElectronsPF']
 process.out.outputCommands = cms.untracked.vstring(['drop *','keep  *_addPileupInfo_*_*', 'keep *_generator_*_*','keep *_addBTagWeights_*_*','keep *_addPileupInfo_*_*','keep *_TriggerResults_*_*','keep *_addMyPileupInfo_*_* ','keep *_myttbarGenEvent10Parts_*_*','keep *_offlinePrimaryVertices_*_*']+['keep *_'+coll+'_*_*' for coll in tobeKept ])
 print "fixed path output comamdns"
 # simple production
