@@ -511,6 +511,52 @@ process.kt6PFJetsPF.Rho_EtaMax = cms.double(2.5); process.kt6PFJetsPF.doRhoFastj
 process.kt6PFJetsPF.src = cms.InputTag("particleFlow")
 process.kt6PFJetsPF.doAreaFastjet = False
 process.patJetCorrFactorsPF.primaryVertices = cms.InputTag("offlinePrimaryVertices")
+myElectronCutBasedId_cfi = imp.load_source('module.name', os.getenv('CMSSW_BASE')+'/DiLeptonicSelection/myElectronCutBasedId_cfi.py')
+process.simpleEleId90cIso = myElectronCutBasedId_cfi.simpleEleId90cIso
+process.pfIsolatedElectronsPF.isolationCut = 99
+process.pfPileUpIsoPF.Vertices = cms.InputTag("goodOfflinePrimaryVertices")
+process.elPFIsoValueGamma03PFIdPF.deposits[0].vetos = cms.vstring('Threshold(0.5)')
+process.elPFIsoValueNeutral03PFIdPF.deposits[0].vetos = cms.vstring('Threshold(0.5)')
+pPF.replace(process.patElectronsPF,process.simpleEleId90cIso * process.patElectronsPF) #pPF += process.simpleEleId90cIso
+process.patElectronsPF.electronIDSources.simpleEleId90cIso = cms.InputTag("simpleEleId90cIso")
+process.patElectronsPF.isolationValues = cms.PSet( pfChargedHadrons = cms.InputTag("elPFIsoValueCharged03PFIdPF"),pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral03PFIdPF"),pfPhotons = cms.InputTag("elPFIsoValueGamma03PFIdPF"))
+process.AddAdditionalElecConvInfoProducer = cms.EDProducer("AddAdditionalElecConvInfoProducer",eleSrc = cms.InputTag("patElectronsPF"));pPF +=process.AddAdditionalElecConvInfoProducer
+import copy,re
+
+def createNminus1Paths (process,p,cutList,collection,label='',debug=False):
+  if debug:
+    print "begin createNminus1Paths debugging"
+  for i,cut in enumerate(cutList):
+    pNM1Tmp = cms.Path(p._seq)
+    if debug:
+      print "constructing cut ",cut,"  ",i
+    tmpCutList = cutList[:i]+cutList[i+1:]
+    if cut.has_key("not"):
+      tmpCutList = [c for c in cutList[:i]+cutList[i+1:] if not c["label"] in cut["not"]] 
+    tmpCutList=createCut(tmpCutList)
+    if debug:
+      print "tmpCutList ", tmpCutList
+    tmpNM1Coll = cms.EDFilter("CandViewSelector", src = cms.InputTag(collection),cut = cms.string(tmpCutList) ,lazyParsing = cms.untracked.bool(True) )
+    tmpNM1CollName = tmpNM1Coll.src.value()+label+'NM1'+cut["label"]
+    setattr(process,tmpNM1CollName,tmpNM1Coll); pNM1Tmp += getattr(process,tmpNM1CollName)
+    tmpNM1CollFilter = cms.EDFilter("CandViewCountFilter", minNumber = cms.uint32(2),maxNumber = cms.uint32(999999), src = cms.InputTag(tmpNM1CollName),lazyParsing = cms.untracked.bool(True)); setattr(process,tmpNM1CollName+"CountFilter",tmpNM1CollFilter);  pNM1Tmp += getattr(process,tmpNM1CollName+"CountFilter")
+    if debug:
+      print 'cut["cut"] ',cut["cut"]
+    reCut = re.match('^\ *([^<>=\?][^<>=?]*)\ *[<>=]?=?\ *[^<>=?]*\ *$',cut["cut"])
+    if not reCut:
+      reCut = re.match('^\ *(\?[^\?:]*\?[^\?:]*:[^\?:]*)\ *$',cut["cut"])
+    if reCut:
+      reCut = reCut.group(1)
+    else:
+      print "warning cut ",cut["cut"]," not recognized"
+    if debug:
+      print "reCut ",reCut
+    tmpHist = copy.deepcopy(cut["hist"]);setattr(tmpHist,'name',cms.untracked.string(cut["label"]));setattr(tmpHist,'description',cms.untracked.string(cut["label"]));setattr(tmpHist,'plotquantity',cms.untracked.string(reCut));tmpHist.lazyParsing = cms.untracked.bool(True)
+    tmpNM1Histo = cms.EDAnalyzer('CandViewHistoAnalyzer', src = cms.InputTag(tmpNM1CollName),histograms = cms.VPSet(tmpHist))
+    setattr(process, tmpNM1CollName+"NM1Histo" ,tmpNM1Histo); pNM1Tmp += getattr(process,tmpNM1CollName+"NM1Histo")
+    setattr(process, tmpNM1CollName+'pNM1',pNM1Tmp)
+
+
 myJetCuts = {"cuts":[{'label':'chargedHadronEnergyFraction','cut':'chargedHadronEnergyFraction > 0.0',"hist":dbHist}
     ,{'label':'chargedEmEnergyFraction','cut':'chargedEmEnergyFraction < 0.99','hist':dbHist}
     ,{'label':'neutralHadronEnergyFraction','cut':'neutralHadronEnergyFraction < 0.99','hist':chi2Hist}
@@ -519,6 +565,9 @@ myJetCuts = {"cuts":[{'label':'chargedHadronEnergyFraction','cut':'chargedHadron
     ,{'label':'pt','cut':'pt > 30.','hist':ptHist}]
   ,"coll":"patJetsPF"}
 process.selectedPatJetsPF.cut = cms.string(createCut(myJetCuts["cuts"]))
+if options.doNM1:
+  createNminus1Paths(process,pPF,myJetCuts["cuts"],myJetCuts["coll"])
+
 process.cleanPatJetsPF.checkOverlaps = cms.PSet(    muons = cms.PSet(src = cms.InputTag("mySelectedPatMuons"),deltaR = cms.double(0.4),
       pairCut = cms.string(''),
       checkRecoComponents = cms.bool(False),
@@ -533,16 +582,7 @@ process.cleanPatJetsPF.checkOverlaps = cms.PSet(    muons = cms.PSet(src = cms.I
       requireNoOverlaps = cms.bool(True)
   ))
 ## adding collections
-myElectronCutBasedId_cfi = imp.load_source('module.name', os.getenv('CMSSW_BASE')+'/DiLeptonicSelection/myElectronCutBasedId_cfi.py')
-process.simpleEleId90cIso = myElectronCutBasedId_cfi.simpleEleId90cIso
-process.pfIsolatedElectronsPF.isolationCut = 99
-process.pfPileUpIsoPF.Vertices = cms.InputTag("goodOfflinePrimaryVertices")
-process.elPFIsoValueGamma03PFIdPF.deposits[0].vetos = cms.vstring('Threshold(0.5)')
-process.elPFIsoValueNeutral03PFIdPF.deposits[0].vetos = cms.vstring('Threshold(0.5)')
-pPF.replace(process.patElectronsPF,process.simpleEleId90cIso * process.patElectronsPF) #pPF += process.simpleEleId90cIso
-process.patElectronsPF.electronIDSources.simpleEleId90cIso = cms.InputTag("simpleEleId90cIso")
-process.patElectronsPF.isolationValues = cms.PSet( pfChargedHadrons = cms.InputTag("elPFIsoValueCharged03PFIdPF"),pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral03PFIdPF"),pfPhotons = cms.InputTag("elPFIsoValueGamma03PFIdPF"))
-process.AddAdditionalElecConvInfoProducer = cms.EDProducer("AddAdditionalElecConvInfoProducer",eleSrc = cms.InputTag("patElectronsPF"));pPF +=process.AddAdditionalElecConvInfoProducer
+
 ## object definition
 #muons
 myMuonCuts = {"cuts":[{'label':'isTrackerMuon','cut':'isTrackerMuon',"hist":boolHist}
@@ -555,27 +595,6 @@ myMuonCuts = {"cuts":[{'label':'isTrackerMuon','cut':'isTrackerMuon',"hist":bool
     ,{'label':'dB','cut':'abs(dB) < 0.02','hist':dbHist}
     ,{'label':'relIso','cut':'(neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.20','hist':relIsoHist}]
   ,"coll":"patMuonsPF"}
-import copy,re
-
-def createNminus1Paths (process,p,cutList,collection,label=''):
-  for i,cut in enumerate(cutList):
-    pNM1Tmp = cms.Path(p._seq)
-    print "contructiong for ",cut,"  ",i
-    tmpCutList = cutList[:i]+cutList[i+1:]
-    if cut.has_key("not"):
-      tmpCutList = [c for c in cutList[:i]+cutList[i+1:] if not c["label"] in cut["not"]] 
-    tmpCutList=createCut(tmpCutList)
-    print tmpCutList
-    tmpNM1Coll = cms.EDFilter("CandViewSelector", src = cms.InputTag(collection),cut = cms.string(tmpCutList) ,lazyParsing = cms.untracked.bool(True) )
-    tmpNM1CollName = tmpNM1Coll.src.value()+label+'NM1'+cut["label"]
-    setattr(process,tmpNM1CollName,tmpNM1Coll); pNM1Tmp += getattr(process,tmpNM1CollName)
-    tmpNM1CollFilter = cms.EDFilter("CandViewCountFilter", minNumber = cms.uint32(2),maxNumber = cms.uint32(999999), src = cms.InputTag(tmpNM1CollName),lazyParsing = cms.untracked.bool(True)); setattr(process,tmpNM1CollName+"CountFilter",tmpNM1CollFilter);  pNM1Tmp += getattr(process,tmpNM1CollName+"CountFilter")
-    reCut = re.match('^\ *([^<>=]*)\ *[<>=]*[=]*\ *[^<>=]*$',cut["cut"]).group(1)
-    print reCut
-    tmpHist = copy.deepcopy(cut["hist"]);setattr(tmpHist,'name',cms.untracked.string(cut["label"]));setattr(tmpHist,'description',cms.untracked.string(cut["label"]));setattr(tmpHist,'plotquantity',cms.untracked.string(reCut));tmpHist.lazyParsing = cms.untracked.bool(True)
-    tmpNM1Histo = cms.EDAnalyzer('CandViewHistoAnalyzer', src = cms.InputTag(tmpNM1CollName),histograms = cms.VPSet(tmpHist))
-    setattr(process, tmpNM1CollName+"NM1Histo" ,tmpNM1Histo); pNM1Tmp += getattr(process,tmpNM1CollName+"NM1Histo")
-    setattr(process, tmpNM1CollName+'pNM1',pNM1Tmp)
 
 if options.doNM1:
   createNminus1Paths(process,pPF,myMuonCuts["cuts"],myMuonCuts["coll"])
@@ -604,15 +623,18 @@ process.myIntermediateElectrons = cms.EDProducer("PATElectronCleaner", src = cms
 
 myElectronCuts = {"cuts":[{'label':'pt','cut':'pt > 20.',"hist":ptHist}
     ,{'label':'numberHitsLostInnerTracker','cut':'gsfTrack.trackerExpectedHitsInner.numberOfLostHits < 2',"hist":chi2Hist}
-    ,{'label':'deltaCotThetaAndDeltaDistance','cut':'!(abs(userFloat("deltaCotTheta")) < 0.02 && abs(userFloat("deltaDistance")) < 0.02 )','hist':boolHist}
-    ,{'label':'overLapMuons','cut':' !hasOverlaps("muonsTrkOrGl")','hist':boolHist}
+    ,{'label':'deltaCotThetaAndDeltaDistance','cut':' ? (abs(userFloat("deltaCotTheta")) < 0.02 && abs(userFloat("deltaDistance")) < 0.02 ) ? 0 : 1 ','hist':boolHist}
+    ,{'label':'overLapMuons','cut':' ? hasOverlaps("muonsTrkOrGl") ? 0 : 1','hist':boolHist}
     ,{'label':'absEta','cut':'abs(eta) < 2.5','hist':etaHist}
     ,{'label':'ecalSeed','cut':'ecalDrivenSeed','hist':boolHist}
     ,{'label':'dB','cut':'abs(dB) < 0.04','hist':dbHist}
     ,{'label':'simpleEleId90cIso','cut':'test_bit(electronID("simpleEleId90cIso"), 0)','hist':boolHist}
     ,{'label':'relIso','cut':'(neutralHadronIso + chargedHadronIso + photonIso)/pt < 0.17','hist':relIsoHist}]
   ,"coll":"myIntermediateElectrons"}
-
+if options.doNM1:
+  print "pommes"
+  createNminus1Paths(process,pPF,myElectronCuts["cuts"],myElectronCuts["coll"],debug=True)
+  print "end pommes"
 process.mySelectedPatElectrons = cms.EDFilter("PATElectronSelector", src = cms.InputTag(myElectronCuts["coll"]),
       	  cut = cms.string(createCut(myElectronCuts["cuts"]))
 )
@@ -627,7 +649,7 @@ process.addBTagWeights = cms.EDProducer("AddMyBTagWeights",jetSrc = cms.InputTag
 #############################################################
 ############################################################
 debug = options.debug
-if debug:
+if debug or options.doNM1:
  process.TFileService=cms.Service("TFileService",fileName=cms.string('patRefSel_diLep_cfg_debughistos.root'))
 # DI Muon Signal 
 if executeDiMuonPath:
