@@ -2,13 +2,13 @@ import FWCore.ParameterSet.Config as cms
 import os,imp
 cfgFileTools = imp.load_source('module.name', os.getenv('CMSSW_BASE')+'/MyCMSSWAnalysisTools/Tools/cfgFileTools.py')
 debugCollection = cfgFileTools.debugCollection
-AddFilters = cfgFileTools.AddFilters
 ###########################
 class myMuonPath:
   def __init__(self,runData,muonTrigger):
     self.runData = runData
     self.muonTrigger = muonTrigger
   def doDiMuonPath(self,process,pPF,debugIt = False):
+      AddFilters = cfgFileTools.AddFilterAndCreatePath(debugIt)
       if debugIt:
         candPtHistogram = cms.PSet(min = cms.untracked.double(0), max = cms.untracked.double(400), nbins =  cms.untracked.int32 (200), name = cms.untracked.string('Pt'), description  = cms.untracked.string(''), plotquantity = cms.untracked.string('pt'))
         candEtaHistogram = cms.PSet(min = cms.untracked.double(-5), max = cms.untracked.double(5), nbins =  cms.untracked.int32 (200), name = cms.untracked.string('Eta'), description  = cms.untracked.string(''), plotquantity = cms.untracked.string('eta'))
