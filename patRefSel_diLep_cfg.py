@@ -748,4 +748,5 @@ if options.createCutFlow:
     tmpPath.visit(edFilters)
     for i,m in enumerate(edFilters.list):
       cfgFileTools.createPathInclusiveMod(process,tmpPath,m,label=str(i))
+    process.out.SelectEvents = cms.untracked.PSet() ## take all events
 

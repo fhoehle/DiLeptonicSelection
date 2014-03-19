@@ -1,6 +1,7 @@
 from DataFormats.FWLite import Events, Handle
 import commands,getopt,sys,os,argparse
-sys.path.append(os.getenv('HOME')+'/PyRoot_Helpers/PyRoot_Functions')
+sys.path.extend([os.getenv('HOME')+'/PyRoot_Helpers/PyRoot_Functions',os.getenv('CMSSW_BASE')+'/MyCMSSWAnalysisTools'])
+
 #commandLine parsing
 parser = argparse.ArgumentParser()
 parser.add_argument('--input',required=True,help='input edm file, which TriggerReport should be evaluated')
@@ -47,7 +48,9 @@ for i,event in enumerate(events):
     if TrigResults[TriggerNames.triggerIndex(triggerName)].accept():
       triggerEfficiencies[triggerName] += 1 
 ###############
-totalEvts=i
-print " trigger efficiencies calculated using ",totalEvts," events"
-for trigN in triggerEfficiencies.keys() :
+totalEvts=i+1
+import Tools.cfgFileTools as cfgFileTools
+print "===================================================="
+print "trigger efficiencies calculated using ",totalEvts," events"
+for trigN in sorted(triggerEfficiencies.keys(),key=cfgFileTools.natural_sort_key) :
   print trigN," "," events: ",triggerEfficiencies[trigN]," eff. ",float(triggerEfficiencies[trigN])/totalEvts
