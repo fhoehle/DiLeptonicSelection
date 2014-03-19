@@ -2,6 +2,9 @@
 # This file contains the Top PAG reference selection work-flow for mu + jets analysis.
 # as defined in
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopLeptonPlusJetsRefSel_mu#Selection_Version_SelV4_valid_fr
+import sys,os
+sys.path.append(os.getenv('CMSSW_BASE')+'/MyCMSSWAnalysisTools/')
+import Tools.cfgFileTools as cfgFileTools
 #
 def createCut(cuts):
   return ''.join([c['cut'] if i == 0 else " && "+c['cut'] for i,c in enumerate(cuts) ])
@@ -58,6 +61,7 @@ options.register('doNM1',False,VarParsing.multiplicity.singleton,VarParsing.varT
 options.register('selectSignal',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'select only ttbar dileptonic (e mu) events')
 options.register('selectBkg',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'select only ttbar non dileptonic (e mu) events')
 options.register('debug',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'debugging activated')
+options.register('createCutFlow',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'create CutFlow for all paths')
 print "args ",sys.argv
 options.parseArguments()
 print "these options where given",options.__dict__['_setDuringParsing']
@@ -738,3 +742,10 @@ if options.keepOnlyTriggerPathResults:
   process.out.outputCommands = cms.untracked.vstring('drop *','keep *_TriggerResults_*_*') 
 if options.noEDMOutput:
   process.outpath = cms.EndPath()
+if options.createCutFlow:
+  for tmpPath in process.paths.itervalues():
+    edFilters = cfgFileTools.EDFilterGatherer()
+    tmpPath.visit(edFilters)
+    for i,m in enumerate(edFilters.list):
+      cfgFileTools.createPathInclusiveMod(process,tmpPath,m,label=str(i))
+
