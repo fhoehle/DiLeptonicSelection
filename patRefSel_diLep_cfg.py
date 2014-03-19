@@ -725,7 +725,7 @@ process.out.SelectEvents.SelectEvents.append( 'simpleProd' )
 if options.runOnTTbar:
   print "attention using genMC ttbar di lep cut"
   process.myttbarGenEvent10Parts = cms.EDProducer('MyTTbarGenEvent10Parts')
-  process.diLepMcFilter = cms.EDFilter('DiLepMcFilter', ttbarEventTag = cms.untracked.InputTag("myttbarGenEvent10Parts")    )
+  process.diLepMcFilter = cms.EDFilter('DiLepMcFilter', ttbarEventTag = cms.untracked.InputTag("myttbarGenEvent10Parts"), invert=cms.bool(False)    )
   if options.selectSignal  and options.selectBkg:
     sys.exit("selectSignal  True and selectBkg True is not possible!!")
   for pName in process.paths.keys():
@@ -734,7 +734,8 @@ if options.runOnTTbar:
     if options.selectSignal:
       pTmp.replace(process.myttbarGenEvent10Parts ,process.myttbarGenEvent10Parts * process.diLepMcFilter)
     if options.selectBkg:
-      pTmp.replace(process.myttbarGenEvent10Parts ,process.myttbarGenEvent10Parts * ~process.diLepMcFilter) 
+      process.diLepMcFilter.invert=cms.bool(True)
+      pTmp.replace(process.myttbarGenEvent10Parts ,process.myttbarGenEvent10Parts * process.diLepMcFilter) 
   print "tagging di lep signal"
   process.isDiLepPath = cms.Path(process.myttbarGenEvent10Parts*process.diLepMcFilter)
 ###
