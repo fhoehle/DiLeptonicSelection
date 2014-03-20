@@ -62,6 +62,9 @@ options.register('selectSignal',False,VarParsing.multiplicity.singleton,VarParsi
 options.register('selectBkg',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'select only ttbar non dileptonic (e mu) events')
 options.register('debug',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'debugging activated')
 options.register('createCutFlow',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'create CutFlow for all paths')
+options.register('tagMuonElectron',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'add path for electron muon event tagging')
+options.register('tagDiElectron',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'add path for dielectron event tagging')
+options.register('tagDiMuon',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'add path for dimuon event tagging')
 print "args ",sys.argv
 options.parseArguments()
 print "these options where given",options.__dict__['_setDuringParsing']
@@ -738,6 +741,15 @@ if options.runOnTTbar:
       pTmp.replace(process.myttbarGenEvent10Parts ,process.myttbarGenEvent10Parts * process.diLepMcFilter) 
   print "tagging di lep signal"
   process.isDiLepPath = cms.Path(process.myttbarGenEvent10Parts*process.diLepMcFilter)
+if options.tagDiMuon:
+  process.DiMuonMcFilter = cms.EDFilter('DiMuonMcFilter', ttbarEventTag = cms.untracked.InputTag("myttbarGenEvent10Parts"), invert=cms.bool(False)    )
+  process.isDiMuonMcTagPath = cms.Path(process.myttbarGenEvent10Parts*process.DiMuonMcFilter)
+if options.tagMuonElectron:
+  process.MuonElectronMcFilter = cms.EDFilter('MuonElectronMcFilter', ttbarEventTag = cms.untracked.InputTag("myttbarGenEvent10Parts"), invert=cms.bool(False)    )
+  process.isMuonElectronMcTagPath = cms.Path(process.myttbarGenEvent10Parts*process.MuonElectronMcFilter)
+if options.tagDiElectron:
+  process.DiElectronMcFilter = cms.EDFilter('DiElectronMcFilter', ttbarEventTag = cms.untracked.InputTag("myttbarGenEvent10Parts"), invert=cms.bool(False)    )
+  process.isDiElectronMcTagPath = cms.Path(process.myttbarGenEvent10Parts*process.DiElectronMcFilter)
 ###
 if options.keepOnlyTriggerPathResults:
   process.out.outputCommands = cms.untracked.vstring('drop *','keep *_TriggerResults_*_*') 
