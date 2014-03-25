@@ -52,5 +52,14 @@ totalEvts=i+1
 import Tools.cfgFileTools as cfgFileTools
 print "===================================================="
 print "trigger efficiencies calculated using ",totalEvts," events"
+interestingPaths = {
+  'diLepMC':{'pathName':'isDiLepPath'}
+  ,'diLep_diMuonMC':{'pathName':'isDiMuonMcTagPath'}
+  ,'diLep_diElectronMC':{'pathName':'isDiElectronMcTagPath'}
+  ,'diLep_ElectronMuonMC':{'pathName':'isMuonElectronMcTagPath'}
+  }
 for trigN in sorted(triggerEfficiencies.keys(),key=cfgFileTools.natural_sort_key) :
   print trigN," "," events: ",triggerEfficiencies[trigN]," eff. ",float(triggerEfficiencies[trigN])/totalEvts
+
+def printLatexTableLine(cut, eff, evts):
+  return cut+" & "+eff+" & "+evts+" \\"
