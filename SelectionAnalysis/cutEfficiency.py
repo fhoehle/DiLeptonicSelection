@@ -58,8 +58,10 @@ interestingPaths = {
   ,'diLep_diElectronMC':{'pathName':'isDiElectronMcTagPath'}
   ,'diLep_ElectronMuonMC':{'pathName':'isMuonElectronMcTagPath'}
   }
-for trigN in sorted(triggerEfficiencies.keys(),key=cfgFileTools.natural_sort_key) :
-  print trigN," "," events: ",triggerEfficiencies[trigN]," eff. ",float(triggerEfficiencies[trigN])/totalEvts
+sortedTriggers = sorted(triggerEfficiencies.keys(),key=cfgFileTools.natural_sort_key)
+
+for trigN in interestingPaths.keys():
+  print trigN," "," events: ",triggerEfficiencies[interestingPaths[trigN]['pathName']]," eff. ",float(triggerEfficiencies[interestingPaths[trigN]['pathName']])/totalEvts
 
 def printLatexTableLine(cut, eff, evts):
   return cut+" & "+eff+" & "+evts+" \\"
