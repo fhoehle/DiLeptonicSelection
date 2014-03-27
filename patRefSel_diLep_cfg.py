@@ -54,7 +54,7 @@ options.register('runRange','',VarParsing.multiplicity.singleton,VarParsing.varT
 options.register('runOnlyDiMuon',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run only di muon path')
 options.register('runOnlyDiElectron',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run only di electron path')
 options.register('runOnlyElectronMuon',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run only electron muon path')
-options.register('runALLpaths',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run all three paths')
+options.register('runAllPaths',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run all three paths')
 options.register('noEDMOutput',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'no EDM output')
 options.register('keepOnlyTriggerPathResults',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'keep only the trigger path results')
 options.register('doNM1',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'do N minus 1 plots')
@@ -80,12 +80,12 @@ if options.runOnlyElectronMuon:
   executeDiElectronMuonPath = True
   executeDiMuonPath = False  
   executeDiElectronPath = False
-if options.runALLpaths:
+if options.runAllPaths:
   executeDiElectronMuonPath = True
   executeDiMuonPath = True
   executeDiElectronPath = True
 
-if sum([options.runOnlyDiMuon,options.runOnlyDiElectron,options.runOnlyElectronMuon,options.runALLpaths]) > 1:
+if sum([options.runOnlyDiMuon,options.runOnlyDiElectron,options.runOnlyElectronMuon,options.runAllPaths]) > 1:
   sys.exit('only one path can be the only')
 
 reRunRange = re.match('^([0-9]+)-([0-9]+)$',options.runRange)
