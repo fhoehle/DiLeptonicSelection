@@ -8,7 +8,7 @@ parser.add_argument('--input',required=True,help='input edm file, which TriggerR
 parser.add_argument('--showAvailablePaths',action='store_true',default=False,help='list available paths')
 parser.add_argument('--listTriggerResultCollections',action='store_true',default=False,help='show trigegrReport collections of input file')
 parser.add_argument('--processName',default='HLT',help='optional process name')
-parser.add_argument('--useMcSignal',default=False,action='store_true',help="calculate eff for signal mc events")
+parser.add_argument('--useMCSignal',default=False,action='store_true',help="calculate eff for signal mc events")
 args=parser.parse_args()
 print "called with ",sys.argv
 #
@@ -35,25 +35,36 @@ interestingPaths = {
   }
 #################
 events = Events (args.input)
+def getPathNames(evts,trigH,trigL):
+  trigNL=[]
+  for e in evts:
+    e.getByLabel((trigL,"",args.processName),trigH); trigR=trigH.product()
+    trigNs=e.object().triggerNames(trigR)
+    for j in range(len(trigNs)):
+      trigNL.append(trigNs.triggerName(j))
+    break
+  return trigNL
 #triggers
-TrigResultslabel=("TriggerResults");TrigResultshandle=Handle("edm::TriggerResults")
-###################
 triggerEfficiencies = {}
+TrigResultslabel=("TriggerResults");TrigResultshandle=Handle("edm::TriggerResults")
+triggerNamesList = getPathNames(events,TrigResultshandle,TrigResultslabel)
+####
+
+####
+for n in triggerNamesList:
+  if args.showAvailablePaths:
+    print "path: ",n
+  triggerEfficiencies[n] = 0
+if args.showAvailablePaths:
+  sys.exit(0)
+###################
 for i,event in enumerate(events):
   event.getByLabel((TrigResultslabel,"",args.processName),TrigResultshandle); TrigResults=TrigResultshandle.product()
   TriggerNames=event.object().triggerNames(TrigResults)
   # print Triggers
-  if args.showAvailablePaths or i == 0:
-    if args.showAvailablePaths: print "trigger in ",args.processName
-    for j in range(len(TriggerNames)):
-      triggerName = TriggerNames.triggerName(j)
-      if args.showAvailablePaths:  print "path: ",triggerName
-      triggerEfficiencies[triggerName] = 0
-    ###########
-    if args.showAvailablePaths: sys.exit(0) 
   for j in range(len(TriggerNames)):
     triggerName = TriggerNames.triggerName(j)
-    mcTriggerName = "" if not interestingPaths.has_key(triggerName) or not args.useMcSignal else ( "" if not interestingPaths[triggerName].has_key('preFilterPath') else interestingPaths[triggerName]['preFilterPath'] )
+    mcTriggerName = "" if not interestingPaths.has_key(triggerName) or not args.useMCSignal else ( "" if not interestingPaths[triggerName].has_key('preFilterPath') else interestingPaths[triggerName]['preFilterPath'] )
     mcSignal =  mcTriggerName == "" 
     if not mcTriggerName == "": 
       mcSignal = TrigResults[TriggerNames.triggerIndex(mcTriggerName)].accept()
@@ -67,7 +78,7 @@ print "trigger efficiencies calculated using ",totalEvts," events"
 sortedTriggers = sorted(triggerEfficiencies.keys(),key=cfgFileTools.natural_sort_key)
 
 for trigN in interestingPaths.keys():
-  print interestingPaths[trigN]['label']," "," events: ",triggerEfficiencies[interestingPaths[trigN]['pathName']]," eff. ",float(triggerEfficiencies[interestingPaths[trigN]['pathName']])/(totalEvts if not interestingPaths[trigN].has_key('preFilterPath') or not args.useMcSignal else  triggerEfficiencies[interestingPaths[trigN]['preFilterPath']]), " ",trigN, ("" if not interestingPaths[trigN].has_key('preFilterPath') or not args.useMcSignal else " prePathFilter "+interestingPaths[trigN]['preFilterPath'])
+  print interestingPaths[trigN]['label']," "," events: ",triggerEfficiencies[interestingPaths[trigN]['pathName']]," eff. ",float(triggerEfficiencies[interestingPaths[trigN]['pathName']])/(totalEvts if not interestingPaths[trigN].has_key('preFilterPath') or not args.useMCSignal else  triggerEfficiencies[interestingPaths[trigN]['preFilterPath']]), " ",trigN, ("" if not interestingPaths[trigN].has_key('preFilterPath') or not args.useMCSignal else " prePathFilter "+interestingPaths[trigN]['preFilterPath'])
 
 def printLatexTableLine(cut, eff, evts):
   return cut+" & "+eff+" & "+evts+" \\"
