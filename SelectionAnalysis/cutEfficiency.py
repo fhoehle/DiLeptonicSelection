@@ -10,7 +10,11 @@ parser.add_argument('--listTriggerResultCollections',action='store_true',default
 parser.add_argument('--processName',default='HLT',help='optional process name')
 parser.add_argument('--useMCSignal',default=False,action='store_true',help="calculate eff for signal mc events")
 parser.add_argument('--showAllPathCutFlow',default='',help="show all paths for regex i.e. myDiMuonPath")
+parser.add_argument('--usage',action='store_true',default=False,help='help message')
 args=parser.parse_args()
+if args.usage:
+  parser.print_help()
+  sys.exit(0)
 print "called with ",sys.argv
 #
 #edmTriggerResults_TriggerResults__
@@ -52,9 +56,14 @@ interestingPaths = coreTools.OrderedDict([
   ,('cutFlowPath40myDiElectronMuonPathElectronsUsedForDiLepCandEMuCount',{'pathName':'cutFlowPath40myDiElectronMuonPathElectronsUsedForDiLepCandEMuCount','preFilterPath':'isMuonElectronMcTagPath','label':'diElectronMuon_eleUsedForDiLepCandEMu'})
   ,('cutFlowPath41myDiElectronMuonPathcleanJetsDiEMuCount',{'pathName':'cutFlowPath41myDiElectronMuonPathcleanJetsDiEMuCount','preFilterPath':'isMuonElectronMcTagPath','label':'diElectronMuon_jetCount'})
   ##############################################
-
+  ,('cutFlowPath1myDiElectronPathgoodOfflinePrimaryVertices',{'pathName':'cutFlowPath1myDiElectronPathgoodOfflinePrimaryVertices','preFilterPath':'isDiElectronMcTagPath','label':'diElectron_goodVertex'})
+  ,('cutFlowPath35myDiElectronPathmyDiElectronTriggerCheck ',{'pathName':'cutFlowPath35myDiElectronPathmyDiElectronTriggerCheck','preFilterPath':'isDiElectronMcTagPath','label':'diElectron_trigger'})
+  ,('cutFlowPath37myDiElectronPathmySelectedPatElectronsMaxCount ',{'pathName':'cutFlowPath37myDiElectronPathmySelectedPatElectronsMaxCount','preFilterPath':'isDiElectronMcTagPath','label':'diElectron_oneMinAndMaxElectron'})
+  ,('cutFlowPath38myDiElectronPathDiLepCandElectronsCount ',{'pathName':'cutFlowPath38myDiElectronPathDiLepCandElectronsCount','preFilterPath':'isDiElectronMcTagPath','label':'diElectron_DiLepCandElectrons'})
+  ,('cutFlowPath40myDiElectronPathDiLepCandElectronsZVetoCount ',{'pathName':'cutFlowPath40myDiElectronPathDiLepCandElectronsZVetoCount','preFilterPath':'isDiElectronMcTagPath','label':'diElectron_ZVeto'})
+  ,('cutFlowPath41myDiElectronPathcleanJetsDiElectronCount ',{'pathName':'cutFlowPath41myDiElectronPathcleanJetsDiElectronCount','preFilterPath':'isDiElectronMcTagPath','label':'diElectron_jetCount'})
+  ,('cutFlowPath43myDiElectronPathDiElectronmyselectedPatMETsCount',{'pathName':'cutFlowPath43myDiElectronPathDiElectronmyselectedPatMETsCount','preFilterPath':'isDiElectronMcTagPath','label':'diElectron_MET'})
   ])
-
 #################
 events = Events (args.input)
 def getPathNames(evts,trigH,trigL):
