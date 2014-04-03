@@ -105,6 +105,8 @@ for i,event in enumerate(events):
       mcSignal = TrigResults[TriggerNames.triggerIndex(mcTriggerName)].accept()
     if TrigResults[TriggerNames.triggerIndex(triggerName)].accept() and mcSignal:
       triggerEfficiencies[triggerName] += 1 
+  if i % 1000 == 0:
+    print "processed ",i," events"
 ###############
 totalEvts=i+1
 import Tools.cfgFileTools as cfgFileTools
