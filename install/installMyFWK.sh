@@ -29,36 +29,10 @@ else
 fi
 eval `scramv1 runtime -sh` # this is cmsenv
 cd src
-# check kerberos
-klist -s
-rc=$?
-if [[ $rc != 0 ]] ; then
-    echo "kerberos credentials missing"
-    klist -c
-    exit $rc
-fi
 ########### checkouts
 cd $CMSSW_BASE/src
-git cms-addpkg AnalysisDataFormats/TopObjects         
-git cms-addpkg DataFormats/PatCandidates       
-git cms-addpkg TopQuarkAnalysis/Configuration         
-git cms-addpkg TopQuarkAnalysis/Examples              
-git cms-addpkg TopQuarkAnalysis/TopEventProducers     
-git cms-addpkg TopQuarkAnalysis/TopEventSelection     
-git cms-addpkg TopQuarkAnalysis/TopJetCombination     
-git cms-addpkg TopQuarkAnalysis/TopKinFitter          
-git cms-addpkg TopQuarkAnalysis/TopObjectResolutions  
-git cms-addpkg TopQuarkAnalysis/TopTools              
-git cms-addpkg PhysicsTools/KinFitter                 
-git cms-addpkg RecoTauTag/Configuration               
-git cms-addpkg RecoTauTag/RecoTau                     
-git cms-addpkg RecoTauTag/TauTagTools                 
-git cms-addpkg PhysicsTools/PatAlgos                       
-git cms-addpkg PhysicsTools/PatUtils                       
-git cms-addpkg PhysicsTools/SelectorUtils                  
-git cms-addpkg PhysicsTools/UtilAlgos                 
-git cms-addpkg CommonTools/ParticleFlow       
-git cms-addpkg PhysicsTools/Utilities                 
+git clone git@github.com:fhoehle/OldCMSSWPackages.git
+for d in $(ls OldCMSSWPackages/); do ln -s OldCMSSWPackages/$d $d; done
 #####
 pkgs=(
   "CMSSW_MyAnalyzers src/ V00-01"
