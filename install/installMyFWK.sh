@@ -41,7 +41,7 @@ cd src
 ########### checkouts
 cd $CMSSW_BASE/src
 git clone git@github.com:fhoehle/OldCMSSWPackages.git
-for d in $(ls OldCMSSWPackages/); do ln -s OldCMSSWPackages/$d $d; done
+for d in $(ls OldCMSSWPackages/); do cp -r OldCMSSWPackages/$d $d; done
 #####
 pkgs=(
   "CMSSW_MyAnalyzers src/ V00-01"
