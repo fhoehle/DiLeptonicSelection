@@ -1,6 +1,15 @@
 #!/bin/bash
 
 cmsswVer=CMSSW_4_2_8_patch7
+function testExistance {
+   repoName=`echo $1 | sed 's/.*\/\([^\/]*\)\.git/\1/'`
+   echo "repoName "$repoName
+   if [ -d "$repoName" ]; then
+     echo "there "$1
+   else 
+    echo "not"
+   fi
+}
 function getGitPackage {
 echo "getting "$1
 if [ -d "$1" ]; then
