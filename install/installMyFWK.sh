@@ -47,6 +47,11 @@ for d in $(ls OldCMSSWPackages/); do
   if [ -d "$d" ]; then
     echo "package $d already there copying subpackages"
     for s in $(ls OldCMSSWPackages/$d); do
+      if [-d "$d/$s"]; then
+        echo "fatal $s already there"
+        echo "diff $PWD/OldCMSSWPackages/$d/$s $PWD/$d/$s"
+        exit 1
+      fi
       cp -r OldCMSSWPackages/$d/$s $d/
     done
   else
