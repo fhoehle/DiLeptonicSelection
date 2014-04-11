@@ -43,7 +43,19 @@ cd $CMSSW_BASE/src
 git cms-addpkg PhysicsTools/Utilities
 cd $CMSSW_BASE/src
 git clone git@github.com:fhoehle/OldCMSSWPackages.git
-for d in $(ls OldCMSSWPackages/); do cp -r OldCMSSWPackages/$d $d; done
+for d in $(ls OldCMSSWPackages/); do 
+  if [ -d "$d" ]; then
+    echo "package $d already there copying subpackages"
+    for s in $(ls OldCMSSWPackages/$d); do
+      cp -r OldCMSSWPackages/$d/$s $d/
+    done
+  else
+    cp -r OldCMSSWPackages/$d $d;
+  fi
+done  
+ls $CMSSW_BASE/src
+ls $CMSSW_BASE/src/PhysicsTools
+echo "TEST"
 #####
 pkgs=(
   "CMSSW_MyAnalyzers src/ V00-01"
