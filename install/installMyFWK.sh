@@ -58,9 +58,6 @@ for d in $(ls OldCMSSWPackages/); do
     cp -r OldCMSSWPackages/$d $d;
   fi
 done  
-ls $CMSSW_BASE/src
-ls $CMSSW_BASE/src/PhysicsTools
-echo "TEST"
 #####
 pkgs=(
   "CMSSW_MyAnalyzers src/ V00-01"
