@@ -40,6 +40,8 @@ eval `scramv1 runtime -sh` # this is cmsenv
 cd src
 ########### checkouts
 cd $CMSSW_BASE/src
+git cms-addpkg PhysicsTools/Utilities
+cd $CMSSW_BASE/src
 git clone git@github.com:fhoehle/OldCMSSWPackages.git
 for d in $(ls OldCMSSWPackages/); do cp -r OldCMSSWPackages/$d $d; done
 #####
