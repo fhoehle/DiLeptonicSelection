@@ -1,5 +1,13 @@
 from DataFormats.FWLite import Events, Handle
-import commands,getopt,sys,os,argparse,re
+import commands,getopt,sys,os,argparse,re,signal
+stopIteration = False
+def signal_handler(signal, frame):
+   print('You pressed Ctrl+C!')
+   global stopIteration 
+   stopIteration = True
+   pass
+signal.signal(signal.SIGINT, signal_handler)
+
 sys.path.extend([os.getenv('HOME')+'/PyRoot_Helpers/PyRoot_Functions',os.getenv('CMSSW_BASE')+'/MyCMSSWAnalysisTools'])
 
 #commandLine parsing
@@ -131,6 +139,8 @@ for i,event in enumerate(events):
       triggerEfficiencies[triggerName] += 1 
   if i % 1000 == 0:
     print "processed ",i," events"
+  if stopIteration:
+    break
 ###############
 ###############
 totalEvts=i+1
