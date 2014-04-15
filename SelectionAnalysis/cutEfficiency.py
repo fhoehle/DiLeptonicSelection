@@ -34,7 +34,7 @@ if args.listTriggerResultCollections:
 ######
 import Tools.coreTools as coreTools
 coreTools.OrderedDict
-interestingPaths = coreTools.OrderedDict([
+interestedPaths = coreTools.OrderedDict([
   ('isDiLepPath',{'pathName':'isDiLepPath','label':'diLepMC','isMCpath':True})
   ,('isDiMuonMcTagPath',{'pathName':'isDiMuonMcTagPath','label':'diLep_diMuonMC','isMCpath':True})
   ,('isDiElectronMcTagPath',{'pathName':'isDiElectronMcTagPath','label':'diLep_diElectronMC','isMCpath':True})
@@ -72,6 +72,22 @@ if args.usingBkg:
       print "neglecting ",k
       del interestedPaths[k]
   print "done mc cleaning"
+###############
+def fixKeysMinus1(d):
+  import re
+  keyRe = re.compile('(cutFlowPath)([0-9][0-9]*)(.*)')
+  for k in d.keys():
+    kg= keyRe.match(k)
+    if kg:
+      d[k]['pathName'] = kg.group(1)+str(int(kg.group(2))-1)+kg.group(3)
+      d[kg.group(1)+str(int(kg.group(2))-1)+kg.group(3)]=d.pop(k)
+  return d
+#########################
+interestingPaths=None
+if args.usingBkg:
+  interestingPaths = fixKeysMinus1(interestedPaths)
+else:
+  interestingPaths=interestedPaths
 #################
 events = Events (args.input)
 def getPathNames(evts,trigH,trigL):
