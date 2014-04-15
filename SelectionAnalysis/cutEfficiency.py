@@ -12,7 +12,7 @@ sys.path.extend([os.getenv('HOME')+'/PyRoot_Helpers/PyRoot_Functions',os.getenv(
 
 #commandLine parsing
 parser = argparse.ArgumentParser()
-parser.add_argument('--input',required=True,help='input edm file, which TriggerReport should be evaluated')
+parser.add_argument('--input',required=True,help='input edm file, which TriggerReport should be evaluated',nargs = '*')
 parser.add_argument('--showAvailablePaths',action='store_true',default=False,help='list available paths')
 parser.add_argument('--listTriggerResultCollections',action='store_true',default=False,help='show trigegrReport collections of input file')
 parser.add_argument('--processName',default='HLT',help='optional process name')
@@ -124,7 +124,7 @@ for n in triggerNamesList:
   triggerEfficiencies[n]=0
 if args.showAvailablePaths:
   sys.exit(0)
-###################
+######################
 for i,event in enumerate(events):
   event.getByLabel((TrigResultslabel,"",args.processName),TrigResultshandle); TrigResults=TrigResultshandle.product()
   TriggerNames=event.object().triggerNames(TrigResults)
