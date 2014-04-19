@@ -224,7 +224,7 @@ if runOnMC:
   triggerSelection = mytriggerSelection
   print "triggerSelection my  ",triggerSelection
 else:
-  triggerSelection = triggerSelectionData
+  triggerSelection = patRefSel_refMuJets.triggerSelectionData
 from TopQuarkAnalysis.Configuration.patRefSel_triggerSelection_cff import triggerResults
 process.step0a = triggerResults.clone(
   triggerConditions = [ triggerSelection ]
@@ -277,11 +277,6 @@ if useL7Parton:
   jecLevels.append( 'L7Parton' )
 
 ### Switch configuration
-if options.runOnData:
-  from PhysicsTools.PatAlgos.tools.coreTools import runOnData
-  runOnData(process, names = [ 'All' ])
-
-
 import PhysicsTools.PatAlgos.tools.pfTools as pfTools
 pfTools.usePF2PAT( process
          , runPF2PAT      = True #runPF2PAT
@@ -292,6 +287,7 @@ pfTools.usePF2PAT( process
                             , jecLevels
                             )
          )
+
 pfTools.adaptPFTaus( process, tauType='hpsPFTau', postfix=postfix )
 pfTools.applyPostfix( process, 'pfNoPileUp'  , postfix ).enable = usePFnoPU
 pfTools.applyPostfix( process, 'pfNoMuon'    , postfix ).enable = useNoMuon
