@@ -1,7 +1,7 @@
-import json,argparse,math
+import json,argparse,math,os
 ##############
 def printLatexTableLine(cut, eff, evts):
-  return cut+" & "+str(eff)+" & "+str(evts)+" \\\\"
+  return cut+" &  $"+str(eff)+"$  & "+str(evts)+" \\\\"
 def formatNumber(num):
   prec=2
   if num*math.pow(10,prec+1) > 1:
@@ -11,7 +11,7 @@ def latex_float(f):
     float_str = f
     if "e" in float_str:
         base, exponent = float_str.split("e")
-        return r"{0} \times 10^{{{1}}}".format(base, int(exponent))
+        return r"{0} \cdot 10^{{{1}}}".format(base, int(exponent))
     else:
         return float_str
 #############
@@ -25,6 +25,10 @@ diElectronMuon = filter(lambda s : s.startswith('diElectronMuon_'),table.keys())
 diElectronMuon.sort(key=lambda n : -1*table[n]['events'])
 diElectron = filter(lambda s : s.startswith('diElectron_'),table.keys())
 diElectron.sort(key=lambda n : -1*table[n]['events'])
-for key in diMuon+diElectronMuon+diElectron:
-  item = table[key] 
-  print printLatexTableLine(key,latex_float(formatNumber(float(item['events'])/( item['preFilterPath']['preFilterPathEvents']if item['preFilterPath'] else item['totalEvents']))),item['events'])
+with open(os.path.basename(args.input)+"_latex.tex",'w') as texOutput:
+  for key in diMuon+diElectronMuon+diElectron:
+    item = table[key] 
+    line=printLatexTableLine(key.replace('_','$\\_$'),latex_float(formatNumber(float(item['events'])/( item['preFilterPath']['preFilterPathEvents']if item['preFilterPath'] else item['totalEvents']))),item['events'])
+    print line
+    texOutput.write(line+"\n")
+  print "latex in ",texOutput.name
