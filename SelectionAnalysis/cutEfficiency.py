@@ -147,15 +147,28 @@ totalEvts=i+1
 import Tools.cfgFileTools as cfgFileTools
 print "===================================================="
 print "trigger efficiencies calculated using ",totalEvts," events"
+import json
+cutFlowRes = {}
 sortedTriggers = interestingPaths.keys() if not args.showAllPathCutFlow else sorted([k for k in interestingPaths.keys() if args.showAllPathCutFlow in k],key=cfgFileTools.natural_sort_key)
 if args.showAllPathCutFlow:
   print " only using paths containing ",args.showAllPathCutFlow
 for trigN in sortedTriggers:#interestingPaths.keys():
+  cutFlowRes[interestingPaths[trigN]['label']] = { 
+    'trigName':trigN,
+    'events':triggerEfficiencies[interestingPaths[trigN]['pathName']],
+    "totalEvents":totalEvts,
+    'preFilterPath': None if not interestingPaths[trigN].has_key('preFilterPath') or not args.useMCSignal else { 
+      'preFilterPath':interestingPaths[trigN]['preFilterPath'], 
+      'preFilterPathEvents':triggerEfficiencies[interestingPaths[trigN]['preFilterPath']] } 
+  }
   print "trigN ",trigN
   print interestingPaths[trigN]['label']," ",
   print " events: ",triggerEfficiencies[interestingPaths[trigN]['pathName']],
   print " eff. ",float(triggerEfficiencies[interestingPaths[trigN]['pathName']])/(totalEvts if (not interestingPaths[trigN].has_key('preFilterPath') or not args.useMCSignal) else  triggerEfficiencies[interestingPaths[trigN]['preFilterPath']]), " ",
   print trigN, ("" if not interestingPaths[trigN].has_key('preFilterPath') or not args.useMCSignal else " prePathFilter "+interestingPaths[trigN]['preFilterPath'])
+
+with open(os.getenv('PWD')+os.path.sep+os.path.basename(args.input[0])+"_jsonCutFlow.txt",'w') as jsonOutput:
+  json.dump(cutFlowRes,jsonOutput, indent = 2) 
 
 def printLatexTableLine(cut, eff, evts):
   return cut+" & "+eff+" & "+evts+" \\"
