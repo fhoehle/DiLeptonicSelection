@@ -1,4 +1,4 @@
-import json,argparse,math,os
+import json,argparse,math,os,sys
 ##############
 def printLatexTableLine(cut, eff, evts):
   return cut+" &  $"+str(eff)+"$  & "+str(evts)+" \\\\"
@@ -25,6 +25,10 @@ diElectronMuon = filter(lambda s : s.startswith('diElectronMuon_'),table.keys())
 diElectronMuon.sort(key=lambda n : -1*table[n]['events'])
 diElectron = filter(lambda s : s.startswith('diElectron_'),table.keys())
 diElectron.sort(key=lambda n : -1*table[n]['events'])
+if len(table.keys()) != len(diMuon+diElectronMuon+diElectron):
+  print "not all keys could be sorted"
+  print "not sorted keys ",set(table.keys())-set(diMuon+diElectronMuon+diElectron)
+  sys.exit(1)
 with open(os.path.basename(args.input)+"_latex.tex",'w') as texOutput:
   for key in diMuon+diElectronMuon+diElectron:
     item = table[key] 
