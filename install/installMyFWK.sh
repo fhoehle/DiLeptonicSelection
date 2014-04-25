@@ -43,19 +43,19 @@ cd $CMSSW_BASE/src
 git cms-addpkg PhysicsTools/Utilities
 cd $CMSSW_BASE/src
 git clone git@github.com:fhoehle/OldCMSSWPackages.git
-for d in $(ls OldCMSSWPackages/); do 
-  if [ -d "$d" ]; then
+for dir in $(ls OldCMSSWPackages/); do 
+  if [ -d "$dir" ]; then
     echo "package $d already there copying subpackages"
-    for s in $(ls OldCMSSWPackages/$d); do
-      if [-d "$d/$s"]; then
+    for s in $(ls OldCMSSWPackages/$dir); do
+      if [ -d "$dir/$s" ]; then
         echo "fatal $s already there"
-        echo "diff $PWD/OldCMSSWPackages/$d/$s $PWD/$d/$s"
+        echo "diff $PWD/OldCMSSWPackages/$dir/$s $PWD/$dir/$s"
         exit 1
       fi
-      cp -r OldCMSSWPackages/$d/$s $d/
+      cp -r OldCMSSWPackages/$dir/$s $dir/
     done
   else
-    cp -r OldCMSSWPackages/$d $d;
+    cp -r OldCMSSWPackages/$dir $dir;
   fi
 done  
 #####
