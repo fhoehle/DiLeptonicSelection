@@ -15,23 +15,35 @@ def latex_float(f):
         return r"{0} \cdot 10^{{{1}}}".format(base, int(exponent))
     else:
         return float_str
-#############
-
-if __name__ == '__main__':
-  parser = argparse.ArgumentParser()
-  parser.add_argument('--input',required=True,help='json input')
-  args=parser.parse_args()
-  table = json.load(open(args.input))
+def json2tex(jsF,printIt=False):
+  table = json.load(open(jsF))
   cutFlowsSorted = cutFlowTools.getSortedKeys(table)
   sortedPathList = reduce(lambda l1,l2:l1+l2,cutFlowsSorted)
   if len(table.keys()) != len(sortedPathList):
     print "not all keys could be sorted"
     print "not sorted keys ",set(table.keys())-set(sortedPathList)
     sys.exit(1)
-  with open(os.path.basename(args.input)+"_latex.tex",'w') as texOutput:
-    for key in sortedPathList:
-      item = table[key] 
+  texedTable=dict2tex(table,sortedPathList)
+  texFilename = os.path.basename(jsF)+"_latex.tex"
+  with open(texFilename,'w') as texOutput:
+    texOutput.write("\n".join(texedTable))
+  if printIt:
+    print "converted to Latex:"
+    for line in texedTable:
+      print "  ",line,"\n"
+  return texFilename
+def dict2tex(theDict,sortedKeyList):
+  lines=[]
+  for key in (sortedKeyList if sortedKeyList else theDict.keys() ):
+      item = theDict[key] 
       line=printLatexTableLine(key.replace('_','$\\_$'),latex_float(formatNumber(float(item['events'])/( item['preFilterPath']['preFilterPathEvents']if item['preFilterPath'] else item['totalEvents']))),item['events'])
-      print line
-      texOutput.write(line+"\n")
-    print "latex in ",texOutput.name
+      lines.append(line)
+  return lines
+#############
+
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--input',required=True,help='json input')
+  args=parser.parse_args()
+  texFile = json2tex(args.input,printIt=True)
+  print "latex in ",texFile
