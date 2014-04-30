@@ -12,7 +12,10 @@ def texEnd():
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument('--input',nargs="*",required=True,help='jsons input')
+  parser.add_argument('--useTTbar',action="store_true",default=False,help='use TTbar events, i.e. looking for dilep tagging')
   args=parser.parse_args()
+  if args.useTTbar:
+    json2tex.cutFlowTools.channels.extend(['diLep_diMuonMC', u'diLep_ElectronMuonMC', u'diLep_diElectronMC', u'diLepMC'])
   latexTables = []
   print " creating test.tex"
   texFile = open("test.tex","w")
