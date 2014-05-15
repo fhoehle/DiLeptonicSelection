@@ -172,6 +172,6 @@ for trigN in sortedTriggers:#interestingPaths.keys():
   print " eff. ",float(triggerEfficiencies[interestingPaths[trigN]['pathName']])/(totalEvts if (not interestingPaths[trigN].has_key('preFilterPath') or not args.useMCSignal) else  triggerEfficiencies[interestingPaths[trigN]['preFilterPath']]), " ",
   print trigN, ("" if not interestingPaths[trigN].has_key('preFilterPath') or not args.useMCSignal else " prePathFilter "+interestingPaths[trigN]['preFilterPath'])
 
-with open(os.getenv('PWD')+os.path.sep+os.path.basename(args.input[0])+("_"+args.postfix if args.postix else "" )+"_jsonCutFlow.txt",'w') as jsonOutput:
+with open(os.getenv('PWD')+os.path.sep+os.path.basename(args.input[0])+("_"+args.postfix if args.postfix else "" )+"_jsonCutFlow.txt",'w') as jsonOutput:
   json.dump(cutFlowRes,jsonOutput, indent = 2) 
   print "cutFlow print in ",jsonOutput.name
