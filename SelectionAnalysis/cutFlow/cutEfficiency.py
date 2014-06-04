@@ -22,6 +22,7 @@ parser.add_argument('--usage',action='store_true',default=False,help='help messa
 parser.add_argument('--usingBkg',action='store_true',default=False,help='use this switch to run on background')
 parser.add_argument('--usingData',action='store_true',default=False,help='use this switch to run on background')
 parser.add_argument('--postfix',default='',help='optional postfix for json')
+parser.add_argument('--jsonOrigin',default=None,help='json file which include information of the origin')
 args=parser.parse_args()
 if args.usage:
   parser.print_help()
@@ -171,6 +172,12 @@ for trigN in sortedTriggers:#interestingPaths.keys():
   print " events: ",triggerEfficiencies[interestingPaths[trigN]['pathName']],
   print " eff. ",float(triggerEfficiencies[interestingPaths[trigN]['pathName']])/(totalEvts if (not interestingPaths[trigN].has_key('preFilterPath') or not args.useMCSignal) else  triggerEfficiencies[interestingPaths[trigN]['preFilterPath']]), " ",
   print trigN, ("" if not interestingPaths[trigN].has_key('preFilterPath') or not args.useMCSignal else " prePathFilter "+interestingPaths[trigN]['preFilterPath'])
+
+if args.jsonOrigin:
+  originJSON = json.load(open(args.jsonOrigin))
+  print "origJSON ",originJSON
+  if originJSON.has_key('intLumi'):
+    cutFlowRes['intLumi']=originJSON['intLumi']
 
 with open(os.getenv('PWD')+os.path.sep+os.path.basename(args.input[0])+("_"+args.postfix if args.postfix else "" )+"_jsonCutFlow.txt",'w') as jsonOutput:
   json.dump(cutFlowRes,jsonOutput, indent = 2) 
