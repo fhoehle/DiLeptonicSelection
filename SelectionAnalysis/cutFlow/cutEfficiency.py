@@ -29,6 +29,10 @@ if args.usage:
   sys.exit(0)
 print "called with ",os.getenv('PWD')," ".join(sys.argv)
 #
+if args.jsonOrigin:
+  if not os.path.isfile(args.jsonOrigin):
+    print "--jsonOrigin doesnot provide valid file ",args.jsonOrigin
+    sys.exit(1)
 #edmTriggerResults_TriggerResults__
 
 if args.listTriggerResultCollections:
