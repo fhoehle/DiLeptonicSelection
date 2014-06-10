@@ -2,12 +2,17 @@ import json,argparse,math,os,sys,subprocess
 import json2tex 
 ##############
 #############
-def texHeader():
-  return  "\\documentclass[12pt]{article}\n"+"\\usepackage{listings}"+"\\begin{document} \n"
-def createTexTableFromFragmentFile(fragmentFile):
-  return  "\\begin{tabular}[h]{c c c} \n" + "  \\input{"+fragmentFile+"}\n" + "\\end{tabular} \n"
-def texEnd():
-  return "\\end{document} \n"
+class cutFlowTexFile(object):
+  def __init__(self,texFileName='test.tex'):
+    self.texFile = open(texFileName,'w')
+    self.header = "\\documentclass[12pt]{article}\n"+"\\usepackage{listings}"+"\\begin{document} \n\n\n"
+  def writeHeader(self):
+    self.texFile.write(self.header)
+  def addTexTableFromFragmentFile(self,fragmentFile,postfix=""):
+    self.texFile.write("\\begin{tabular}[h]{c c c} \n" + "  \\input{"+fragmentFile+"}\n" + "\\end{tabular} \n"+postfix)
+  def texEnd(self):
+    self.texFile.write("\\end{document} \n")
+    self.texFile.close()
 ###############
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
@@ -18,18 +23,17 @@ if __name__ == '__main__':
     json2tex.cutFlowTools.channels.extend(['diLep_diMuonMC', u'diLep_ElectronMuonMC', u'diLep_diElectronMC', u'diLepMC'])
   latexTables = []
   print " creating test.tex"
-  texFile = open("test.tex","w")
-  texFile.write(texHeader()+"\n\n")
+  texFile = cutFlowTexFile()
+  texFile.writeHeader()
   for jsF in args.input:
     print "convert to latex ",jsF
     latexJsF=json2tex.json2tex(jsF)
     print "done, created ",latexJsF
     latexTables.append(latexJsF)
-    texFile.write("\\begin{lstlisting}[breaklines]\n  "+jsF+"\n\\end{lstlisting}"+"\n")
-    texFile.write(createTexTableFromFragmentFile(latexJsF)+"\n\\newpage\n\n")
-  texFile.write(texEnd()+"\n")
-  texFile.close()
-  pdfLatex=subprocess.Popen(["pdflatex "+texFile.name],shell=True)
+    texFile.texFile.write("\\begin{lstlisting}[breaklines]\n  "+jsF+"\n\\end{lstlisting}"+"\n")
+    texFile.addTexTableFromFragmentFile(latexJsF,postfix="\n\\newpage\n\n")
+  texFile.texEnd()
+  pdfLatex=subprocess.Popen(["pdflatex "+texFile.texFile.name],shell=True)
   pdfLatex.wait()
   #print pdfLatex.communicate()[0]
   sys.exit(pdfLatex.returncode)
