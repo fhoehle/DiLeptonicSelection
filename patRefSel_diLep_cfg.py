@@ -23,7 +23,7 @@ triggersUsedForAnalysis = {
   ,'diElectron':{}
   ,'electronMuon':{}
 }
-electronMuonDataUseTriggers = {'HLT_Mu8_Ele17_CaloIdL_v*':[0,167913],'HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v*':[167914,999999],'HLT_Mu17_Ele8_CaloIdL_v*':[0,175972] ,'HLT_Mu17_Ele8_CaloIdT_CaloIsoVL-v*':[175973,999999]}
+electronMuonDataUseTriggers = {'HLT_Mu8_Ele17_CaloIdL_v*':[0,167913],'HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v*':[167914,999999],'HLT_Mu17_Ele8_CaloIdL_v*':[0,175972] ,'HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v*':[175973,999999]}
 triggersUsedForAnalysis['electronMuon']['data'] = electronMuonDataUseTriggers; triggersUsedForAnalysis['electronMuon']['mc']="HLT_Mu17_Ele8_CaloIdL_v9 OR HLT_Mu8_Ele17_CaloIdL_v9"#'HLT_Mu10_Ele10_CaloIdL_v3 OR HLT_Mu8_Ele17_CaloIdL_v2'
 diElectronDataUseTriggers = {'HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v*':[0,170901],'HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*':[170902,999999]}
 triggersUsedForAnalysis['diElectron']['data']=diElectronDataUseTriggers; triggersUsedForAnalysis['diElectron']['mc']="HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v8" #HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v2"
