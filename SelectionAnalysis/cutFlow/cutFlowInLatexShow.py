@@ -13,6 +13,13 @@ class cutFlowTexFile(object):
   def texEnd(self):
     self.texFile.write("\\end{document} \n")
     self.texFile.close()
+##############
+def compileTexFile(texFile):
+  import subprocess
+  pdfLatex=subprocess.Popen(["pdflatex "+texFile],shell=True)
+  pdfLatex.wait()
+  return pdfLatex.returncode
+
 ###############
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
@@ -33,7 +40,5 @@ if __name__ == '__main__':
     texFile.texFile.write("\\begin{lstlisting}[breaklines]\n  "+jsF+"\n\\end{lstlisting}"+"\n")
     texFile.addTexTableFromFragmentFile(latexJsF,postfix="\n\\newpage\n\n")
   texFile.texEnd()
-  pdfLatex=subprocess.Popen(["pdflatex "+texFile.texFile.name],shell=True)
-  pdfLatex.wait()
-  #print pdfLatex.communicate()[0]
-  sys.exit(pdfLatex.returncode)
+  pdfLatex=compileTexFile(texFile.texFile.name)
+  sys.exit(pdfLatex)
