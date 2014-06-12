@@ -47,19 +47,23 @@ for dir in $(ls OldCMSSWPackages/); do
   if [ -d "$dir" ]; then
     echo "package $d already there copying subpackages"
     for s in $(ls OldCMSSWPackages/$dir); do
+      if [ "$dir/$s" -eq "RecoLuminosity/LumiDB" ]; then
+        echo "github based version should be used git clone https://github.com/cms-sw/RecoLuminosity-LumiDB.git $CMSSW_BASE/src/RecoLuminosity/LumiDB and git checkout V04-02-10"
+        continue
+      fi
       if [ -d "$dir/$s" ]; then
         echo "fatal $s already there"
-        if [ "$dir/$s" -eq "RecoLuminosity/LumiDB" ]; then
-          echo "github based version should be used git clone https://github.com/cms-sw/RecoLuminosity-LumiDB.git $CMSSW_BASE/src/RecoLuminosity/LumiDB and git checkout V04-02-10"
-          continue
-        fi 
         echo "diff $PWD/OldCMSSWPackages/$dir/$s $PWD/$dir/$s"
         exit 1
       fi
       cp -r OldCMSSWPackages/$dir/$s $dir/
     done
   else
-    cp -r OldCMSSWPackages/$dir $dir;
+    if [ "$dir" -eq "RecoLuminosity" ]; then
+      rsync -av --exclude='OldCMSSWPackages/RecoLuminosity/LumiDB' OldCMSSWPackages/$dir $dir 
+    else
+      cp -r OldCMSSWPackages/$dir $dir;
+    fi
   fi
 done  
 #####
