@@ -49,6 +49,10 @@ for dir in $(ls OldCMSSWPackages/); do
     for s in $(ls OldCMSSWPackages/$dir); do
       if [ -d "$dir/$s" ]; then
         echo "fatal $s already there"
+        if [ "$dir/$s" -eq "RecoLuminosity/LumiDB" ]; then
+          echo "github based version should be used git clone https://github.com/cms-sw/RecoLuminosity-LumiDB.git $CMSSW_BASE/src/RecoLuminosity/LumiDB and git checkout V04-02-10"
+          continue
+        fi 
         echo "diff $PWD/OldCMSSWPackages/$dir/$s $PWD/$dir/$s"
         exit 1
       fi
