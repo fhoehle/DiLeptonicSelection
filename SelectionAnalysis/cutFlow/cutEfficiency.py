@@ -188,5 +188,5 @@ if args.jsonOrigin:
 outputJSON["cutFlowRes"]=cutFlowRes
 
 with open(os.getenv('PWD')+os.path.sep+os.path.basename(args.input[0])+("_"+args.postfix if args.postfix else "" )+"_jsonCutFlow.txt",'w') as jsonOutput:
-  json.dump(cutFlowRes,jsonOutput, indent = 2) 
+  json.dump(outputJSON,jsonOutput, indent = 2) 
   print "cutFlow print in ",jsonOutput.name

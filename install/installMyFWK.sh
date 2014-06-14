@@ -60,7 +60,7 @@ for dir in $(ls OldCMSSWPackages/); do
     done
   else
     if [ "$dir" == "RecoLuminosity" ]; then
-      rsync -av --exclude='OldCMSSWPackages/RecoLuminosity/LumiDB' OldCMSSWPackages/$dir $dir 
+      rsync -a --exclude='OldCMSSWPackages/RecoLuminosity/LumiDB' OldCMSSWPackages/$dir $dir 
     else
       cp -r OldCMSSWPackages/$dir $dir;
     fi
