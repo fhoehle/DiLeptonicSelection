@@ -24,6 +24,7 @@ class json2tex(object):
   def __init__(self,jsF,printIt=False):
     print " processing ",jsF
     self.table = None if not os.path.isfile(jsF) else json.load(open(jsF))
+    self.table = self.table["cutFlowRes"] if has_key("cutFlowRes") else self.table
     self.jsF = jsF+'_'+coreTools.idGenerator()
     self.printIt = printIt
   def convert(self):
