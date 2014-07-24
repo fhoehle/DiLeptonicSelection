@@ -68,10 +68,10 @@ for dir in $(ls OldCMSSWPackages/); do
 done  
 #####
 pkgs=(
-  "CMSSW_MyAnalyzers src/ V00-01"
+  "CMSSW_MyAnalyzers src/" #V00-01"
   "CMSSW_MyProducers src/"
-  "CMSSW_MyDataFormats src/ V00-01"
-  "CMSSW_MyFilters src/  V00-01"
+  "CMSSW_MyDataFormats src/"
+  "CMSSW_MyFilters src/"
 )
 # install my packages
 for idx in ${!pkgs[*]}; do
