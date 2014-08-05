@@ -8,12 +8,13 @@ class myElectronMuonPath():
   def __init__(self,runData,electronMuonTrigger):
     self.runData = runData
     self.electronMuonTrigger = electronMuonTrigger
+    self.eleMuonPathName = "myDiElectronMuonPath"
   def doDiEleMuonPath(self,process,pPF,debugIt = False):
     AddFilters = cfgFileTools.AddFilterAndCreatePath(debugIt) 
     if debugIt:
         candPtHistogram = cms.PSet(min = cms.untracked.double(0), max = cms.untracked.double(400), nbins =  cms.untracked.int32 (200), name = cms.untracked.string('Pt'), description  = cms.untracked.string(''), plotquantity = cms.untracked.string('pt'))
         candEtaHistogram = cms.PSet(min = cms.untracked.double(-5), max = cms.untracked.double(5), nbins =  cms.untracked.int32 (200), name = cms.untracked.string('Eta'), description  = cms.untracked.string(''), plotquantity = cms.untracked.string('eta'))
-    process.myDiElectronMuonPath = cms.Path(pPF._seq);localPath = process.myDiElectronMuonPath
+    setattr(process, self.eleMuonPathName , cms.Path(pPF._seq));localPath = getattr(process,self.eleMuonPathName)
     process.myMuonElectronTriggerCheck = cms.EDFilter("TriggerResultsFilter",l1tIgnoreMask = cms.bool(False),l1tResults = cms.InputTag(""),l1techIgnorePrescales = cms.bool(False),    hltResults = cms.InputTag("TriggerResults","","HLT"),  triggerConditions = cms.vstring(self.electronMuonTrigger),throw = cms.bool(False), daqPartitions = cms.uint32(1)); localPath += process.myMuonElectronTriggerCheck;#analyzeColl("patElectronsPF",localPath,process,"diEMuTriggerOK");analyzeColl("mySelectedPatMuons2p1",localPath,process,"Muon2p1")
     #if debugIt:debugCollection('mySelectedPatElectrons',localPath,cms.VPSet(candPtHistogram,candEtaHistogram),process,"DiEMu");
     process.mySelectedPatElectronsMuonsMinCount = cms.EDFilter("PATCandViewCountFilter", maxNumber = cms.uint32(99), src = cms.InputTag("mySelectedPatElectrons"), minNumber = cms.uint32(1));    localPath += process.mySelectedPatElectronsMuonsMinCount

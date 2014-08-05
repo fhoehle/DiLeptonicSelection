@@ -7,6 +7,7 @@ class myMuonPath:
   def __init__(self,runData,muonTrigger):
     self.runData = runData
     self.muonTrigger = muonTrigger
+    self.muonPathName = "myDiMuonPath"
   def doDiMuonPath(self,process,pPF,debugIt = False):
       AddFilters = cfgFileTools.AddFilterAndCreatePath(debugIt)
       if debugIt:
@@ -14,7 +15,7 @@ class myMuonPath:
         candEtaHistogram = cms.PSet(min = cms.untracked.double(-5), max = cms.untracked.double(5), nbins =  cms.untracked.int32 (200), name = cms.untracked.string('Eta'), description  = cms.untracked.string(''), plotquantity = cms.untracked.string('eta'))
       #################
       Zmax=106;Zmin=76
-      process.myDiMuonPath = cms.Path(pPF._seq); localPath = process.myDiMuonPath
+      setattr(process,self.muonPathName, cms.Path(pPF._seq)); localPath = getattr(process,self.muonPathName)
       process.myDiMuonTriggerCheck = cms.EDFilter("TriggerResultsFilter",l1tIgnoreMask = cms.bool(False),l1tResults = cms.InputTag(""),l1techIgnorePrescales = cms.bool(False),    hltResults = cms.InputTag("TriggerResults","","HLT"),  triggerConditions = cms.vstring(self.muonTrigger),throw = cms.bool(False), daqPartitions = cms.uint32(1));  localPath += process.myDiMuonTriggerCheck;#analyzeColl("patMuonsPF",localPath,process,"diMuTriggerOK")
       #my di muon selection
       if debugIt:debugCollection('mySelectedPatMuons',localPath,cms.VPSet(candPtHistogram,candEtaHistogram),process);debugCollection('mySelectedPatMuons2p1',localPath,cms.VPSet(candPtHistogram,candEtaHistogram),process);

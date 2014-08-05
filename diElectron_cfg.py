@@ -7,6 +7,7 @@ class myElectronPath:
   def __init__(self,runData,electronTrigger):
     self.runData = runData
     self.electronTrigger = electronTrigger
+    self.electronPathName = "myDiElectronPath"
   def doDiElectronPath(self,process,pPF,debugIt = False):
     AddFilters = cfgFileTools.AddFilterAndCreatePath(debugIt) 
     if debugIt:
@@ -14,7 +15,7 @@ class myElectronPath:
         candEtaHistogram = cms.PSet(min = cms.untracked.double(-5), max = cms.untracked.double(5), nbins =  cms.untracked.int32 (200), name = cms.untracked.string('Eta'), description  = cms.untracked.string(''), plotquantity = cms.untracked.string('eta'))
     ## my electron selection
     Zmax=106;Zmin=76
-    process.myDiElectronPath = cms.Path(pPF._seq); localPath = process.myDiElectronPath
+    setattr(process,self.electronPathName, cms.Path(pPF._seq)); localPath = getattr(process,self.electronPathName)
     process.myDiElectronTriggerCheck = cms.EDFilter("TriggerResultsFilter",l1tIgnoreMask = cms.bool(False),l1tResults = cms.InputTag(""),l1techIgnorePrescales = cms.bool(False),    hltResults = cms.InputTag("TriggerResults","","HLT"),  triggerConditions = cms.vstring(self.electronTrigger),throw = cms.bool(False), daqPartitions = cms.uint32(1));  localPath += process.myDiElectronTriggerCheck;#analyzeColl("patElectronsPF",localPath,process,"diETriggerOK")
     coll='patElectronsPF'
     if debugIt:

@@ -55,6 +55,7 @@ options.register('runOnlyDiMuon',False,VarParsing.multiplicity.singleton,VarPars
 options.register('runOnlyDiElectron',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run only di electron path')
 options.register('runOnlyElectronMuon',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run only electron muon path')
 options.register('runAllPaths',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'run all three paths')
+options.register('doSkimming',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'do skimming, onl events passing diMuon diElectron or eleMu path are saved')
 options.register('noEDMOutput',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'no EDM output')
 options.register('keepOnlyTriggerPathResults',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'keep only the trigger path results')
 options.register('doNM1',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'do N minus 1 plots')
@@ -758,4 +759,11 @@ if options.createCutFlow:
     for i,m in enumerate(edFilters.list):
       cfgFileTools.createPathInclusiveMod(process,tmpPath,m,label=str(i))
     process.out.SelectEvents = cms.untracked.PSet() ## take all events
-
+if options.doSkimming:
+  process.out.SelectEvents.SelectEvents = []
+  if executeDiMuonPath:
+    process.out.SelectEvents.SelectEvents.append(myMuonPath.muonPathName)
+  if executeDiElectronPath:
+    process.out.SelectEvents.SelectEvents.append(myElectronPath.electronPathName)
+  if executeDiElectronMuonPath:
+    process.out.SelectEvents.SelectEvents.append(myElectronMuonPath.eleMuonPathName)
