@@ -645,6 +645,14 @@ process.mySelectedPatElectrons = cms.EDFilter("PATElectronSelector", src = cms.I
 
 pPF += process.mySelectedPatElectrons; pPF += process.cleanPatJetsPF
 process.addBTagWeights = cms.EDProducer("AddMyBTagWeights",jetSrc = cms.InputTag("cleanPatJetsPF")); pPF += process.addBTagWeights
+### pileup info
+process.addMyPileupInfo = cms.EDProducer("AddPileUpWeightsProducer", vertexSrc = cms.InputTag("offlinePrimaryVertices"),
+   pileupFile1 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/data/JeremyFWK_PU3DMC_converted.root"),
+   pileupFile2 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/data/JeremyFWK_dataPUhisto_2011AB_73.5mb_pixelLumi_diffBinning_bin25.root"),
+   PUHistname1 = cms.string("histoMCPU"), PUHistname2 = cms.string("pileup")); 
+if not options.runOnData:
+  pPF += process.addMyPileupInfo
+  process.MessageLogger.debugModules.extend(['addMyPileupInfo'])
 ############################################################
 #############################################################
 ############################################################
@@ -712,11 +720,7 @@ print "fixed path output comamdns"
 # simple production
 process.simpleProd = cms.Path()
 if not options.runOnData:
-  process.addMyPileupInfo = cms.EDProducer("AddPileUpWeightsProducer", vertexSrc = cms.InputTag("offlinePrimaryVertices"),
-   pileupFile1 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/data/JeremyFWK_PU3DMC_converted.root"),
-   pileupFile2 = cms.string("$CMSSW_BASE/src/CMSSW_MyProducers/AddPileUpWeightsProducer/data/JeremyFWK_dataPUhisto_2011AB_73.5mb_pixelLumi_diffBinning_bin25.root"),
-   PUHistname1 = cms.string("histoMCPU"), PUHistname2 = cms.string("pileup")); process.simpleProd += process.addMyPileupInfo
-  process.MessageLogger.debugModules.extend(['addMyPileupInfo'])
+  process.simpleProd += process.addMyPileupInfo
 process.MessageLogger.destinations.append('myDebugFile')
 process.MessageLogger.myDebugFile = cms.untracked.PSet(threshold = cms.untracked.string('INFO'),filename = cms.untracked.string('patRefSel_diLep_cfg_myDebugFile.log'))
 #process.addMyBTagWeights = cms.EDProducer("AddMyBTagWeights"); process.simpleProd += process.addMyBTagWeights
