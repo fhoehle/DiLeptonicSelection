@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cmsswVer=CMSSW_4_2_8_patch7
+cmsswVer=CMSSW_5_3_
 function testExistance {
    repoName=`echo $1 | sed 's/.*\/\([^\/]*\)\.git/\1/'`
    echo "repoName "$repoName
@@ -24,7 +24,7 @@ fi
 ####
 echo "Installing My FWK "
 #
-export SCRAM_ARCH=slc5_amd64_gcc434
+#export SCRAM_ARCH=slc5_amd64_gcc434
 if [ -z "$CMSSW_BASE" ]; then
  if [[ "$PWD" =~ "$cmsswVer" ]]; then
    echo "you forgot cmsenv"
