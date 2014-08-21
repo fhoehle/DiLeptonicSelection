@@ -42,6 +42,8 @@ cd src
 cd $CMSSW_BASE/src
 git cms-addpkg PhysicsTools/Utilities
 git cms-addpkg PhysicsTools/PatUtils
+git cms-addpkg DataFormats/PatCandidates
+replaced=('PhysicsTools/PatUtils' 'DataFormats/PatCandidates')
 cd $CMSSW_BASE/src
 git clone git@github.com:fhoehle/OldCMSSWPackages.git
 for dir in $(ls OldCMSSWPackages/); do 
@@ -50,6 +52,10 @@ for dir in $(ls OldCMSSWPackages/); do
     for s in $(ls OldCMSSWPackages/$dir); do
       if [ "$dir/$s" == "RecoLuminosity/LumiDB" ]; then
         echo "github based version should be used git clone https://github.com/cms-sw/RecoLuminosity-LumiDB.git $CMSSW_BASE/src/RecoLuminosity/LumiDB and git checkout V04-02-10"
+        continue
+      fi
+      if [[ $replaced =~ "$dir/$s" ]]; then 
+	echo "  $dir/$s was replaced"
         continue
       fi
       if [ -d "$dir/$s" ]; then
