@@ -43,7 +43,14 @@ cd $CMSSW_BASE/src
 git cms-addpkg PhysicsTools/Utilities
 git cms-addpkg PhysicsTools/PatUtils
 git cms-addpkg DataFormats/PatCandidates
-replaced="PhysicsTools/PatUtils DataFormats/PatCandidates"
+git cms-addpkg RecoTauTag/RecoTau
+git cms-addpkg PhysicsTools/PatAlgos
+git cms-addpkg AnalysisDataFormats/TopObjects
+git cms-addpkg CommonTools/ParticleFlow
+git cms-addpkg RecoTauTag/TauTagTools
+git cms-addpkg TopQuarkAnalysis/TopJetCombination
+
+replaced="PhysicsTools/PatUtils DataFormats/PatCandidates RecoTauTag/RecoTau PhysicsTools/PatAlgos AnalysisDataFormats/TopObjects TopQuarkAnalysis/TopJetCombination RecoTauTag/TauTagTools CommonTools/ParticleFlow"
 cd $CMSSW_BASE/src
 git clone git@github.com:fhoehle/OldCMSSWPackages.git
 for dir in $(ls OldCMSSWPackages/); do 
