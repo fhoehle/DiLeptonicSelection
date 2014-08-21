@@ -41,6 +41,7 @@ cd src
 ########### checkouts
 cd $CMSSW_BASE/src
 git cms-addpkg PhysicsTools/Utilities
+git cms-addpkg PhysicsTools/PatUtils
 cd $CMSSW_BASE/src
 git clone git@github.com:fhoehle/OldCMSSWPackages.git
 for dir in $(ls OldCMSSWPackages/); do 
