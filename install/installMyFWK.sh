@@ -60,7 +60,6 @@ for dir in $(ls OldCMSSWPackages/); do
         echo "github based version should be used git clone https://github.com/cms-sw/RecoLuminosity-LumiDB.git $CMSSW_BASE/src/RecoLuminosity/LumiDB and git checkout V04-02-10"
         continue
       fi
-      echo $replaced "$dir/$s"
       if [[ $replaced =~ "$dir/$s" ]]; then 
 	echo "  $dir/$s was replaced"
         continue
